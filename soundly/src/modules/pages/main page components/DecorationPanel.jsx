@@ -2,7 +2,8 @@ const DecorationPanel = () => {
     return(
     <div class="section-decoration">
         <div class="about-section">
-            <p>Слушай музыку и наслаждайся</p>
+            <p>Слушай музыку</p>
+            <p>и наслаждайся</p>
             <a href="" class="telegram"></a>
             <a href="" class="vk"></a>
         </div>

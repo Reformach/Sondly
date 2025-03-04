@@ -6,6 +6,7 @@ const Chart = () => {
         <h2>Чарт</h2>
         <ol className="chart-list">
             <ChartStroke/>
+            <ChartStroke/>
         </ol> 
     </section>
     );
