@@ -1,0 +1,682 @@
+/* Общие стили */
+.main-container {
+  font-family: 'Nunito', sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(-45deg, #ed193b, #a98055, #f286e2, #681d7a);
+  background-size: 400% 400%;
+  animation: gradient 10s ease infinite;
+  color: #fff;
+}
+
+p{
+  margin: 0;
+}
+
+body{
+  margin: 0;
+}
+
+button{
+  background: none;
+  border: none;
+  /* color: #fff; */
+  cursor: pointer;
+}
+
+@keyframes gradient {
+0% {
+  background-position: 0% 50%;
+}
+50% {
+  background-position: 100% 50%;
+}
+100% {
+  background-position: 0% 50%;
+}
+}
+
+.panels{
+  background-color: rgba(50, 50, 50, 0.7); 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 24px;
+}
+
+.header-button{
+  color:white;
+  border-radius: 24px;
+  background-color: #679BE8;
+  border: none;
+  transition: background-color 0.3s;
+  padding: 10px 0;
+}
+
+.header-button:hover {
+  background-color: rgba(255, 255, 255, 0.644);
+}
+
+.header-buttons{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Автоматическое заполнение */
+  gap: 10px; /* Отступ между кнопками */
+}
+
+.section-decoration{
+  margin-top: 20px;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background: -webkit-linear-gradient(50deg,#5e46a3,#689be9);/* Chrome 10-25, Safari 5.1-6 */   
+  height: 160px;      
+  padding: 30px 0px 0px 30px; 
+  font-size: 25px;  
+  align-items: flex-end;   
+  font-style: bold; 
+  line-height: 41px;         
+}
+
+.about-section{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.image-decoration{
+  height: 220px;
+}
+
+.main-content{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 3em;
+}
+
+.navigation-header{
+  display: flex;
+  flex-direction: column;
+  padding: 0px 20px;
+}
+
+.line-navigation-header{
+  width: 100%;
+}
+
+/* Боковая панель */
+.sidebar {
+  width: 250px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Блок профиля */
+.profile {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.profile-name {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Навигация */
+.navigation {
+  flex-grow: 1;
+}
+
+.navigation ul{
+  list-style-type:  none;
+  padding: 0 20px;
+}
+
+.navigation li{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  padding-top: 10px;
+}
+
+.icon-navigation{
+  width: 25px;
+  height: 25px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  text-decoration: none;
+  color: #fff;
+  font-size: 14px;
+  border-radius: 12px;
+  transition: background-color 0.3s;
+}
+
+.nav-link.active {
+  background-color: #679BE8;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Основной контент */
+.content {
+  flex-grow: 1;
+  padding: 20px;
+  margin: 20px;
+  background-color: rgba(50, 50, 50, 0.7); /* #323232 с 70% прозрачности */
+  border-radius: 24px; /* Закругления */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Заголовок и поиск */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.app-name {
+  font-size: 24px;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.search {
+  flex-grow: 0.9;
+}
+
+.search-input {
+  padding: 10px;
+  border: none;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 14px;
+  width: 100%;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Карточка с градиентом */
+.gradient-card {
+  background: linear-gradient(135deg, #007bff, #00bfff);
+  padding: 20px;
+  border-radius: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.gradient-card h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Чарт */
+.chart {
+  margin-bottom: 30px;
+  flex-grow: 1;
+}
+
+.chart-interaction{
+  display: flex;
+  flex-direction: row;
+  flex-grow: 2;
+  justify-content: flex-end;
+}
+
+.like-button-icon{
+  color: white;
+  width: 25px;
+  height: 25px;
+}
+
+.play-button-icon-chart{
+  color: white;
+  width: 25px;
+  height: 25px;
+}
+
+.like-and-time{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  align-items: center;
+}
+
+.chart h2 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+.chart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  counter-reset: myCounter;
+  padding: 0;
+}
+
+.chart-list li:before{
+  counter-increment: myCounter;
+  content: counter(myCounter);
+  color: white;
+  display: inline-block;
+  text-align: center;
+  line-height: normal;
+  height: auto;
+  width: auto;
+} 
+
+.chart-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.chart-position {
+  font-size: 16px;
+  font-weight: bold;
+  margin-right: 15px;
+}
+
+.chart-title {
+  font-size: 16px;
+  flex-grow: 1;
+}
+
+.name-and-description{
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-grow: 1;
+  padding-left: 20px;
+}
+
+.chart-stroke{
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.description-container{
+  display: flex;
+  flex-direction: column;
+}
+
+
+.chart-artist {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Плейлисты */
+.playlists {
+  margin-bottom: 30px;
+}
+
+.playlists h2 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+.playlist-list {
+  display: flex;
+  gap: 15px;
+  padding: 0;
+}
+
+.playlist-item {
+  background: url(https://img5.goodfon.ru/wallpaper/nbig/1/5e/morten-solgaard-pedersen-by-morten-solgaard-pedersen-cat-art.jpg);
+  background-size: cover;
+  border-radius: 12px; /* Закругленные углы */
+  width: 200px; /* Ширина карточки */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Тень */
+  transition: transform 0.2s ease, box-shadow 0.2s ease; /* Анимация при наведении */
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.playlist-header{
+  display: flex;
+  justify-content: space-between;
+}
+
+.more-see-text{
+  color: #C0C0C0;
+}
+
+.playlist-name {
+  font-size: 18px; /* Размер шрифта заголовка */
+  font-weight: bold; /* Жирный шрифт */
+  color: #fff; /* Белый цвет текста */
+  margin-bottom: 8px; /* Отступ снизу */
+}
+
+.playlist-description {
+  font-size: 14px; /* Размер шрифта описания */
+  color: rgba(255, 255, 255, 0.7); /* Полупрозрачный белый цвет */
+  margin: 0; /* Убираем отступы */
+}
+
+.playlist-item:hover {
+  transform: translateY(-4px); /* Поднимаем карточку при наведении */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Увеличиваем тень */
+}
+
+.playlist-duration {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.playlist-content{
+  background-color: rgba(137, 103, 237, 0.41);
+  backdrop-filter: blur(5px);
+  border-radius: 0 0 12px 12px;
+  padding: 10px;
+}
+
+.show-more {
+  padding: 10px;
+  border: none;
+  background-color: #007bff;
+  color: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.show-more:hover {
+  background-color: #0056b3;
+}
+
+/* Музыкальный плеер */
+.player {
+  background-color: #202020;
+  border-radius: 12px;
+  padding: 10px 20px;
+  height: 100px; /* 1/9 от основного блока */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto; /* Прижимаем плеер к низу */
+}
+
+.sound-container{
+  position: relative; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px;
+}
+
+.sound-slider{
+  display: flex;
+  flex-direction: row;
+}
+
+.volume-popup {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: 5px;
+  animation: fadeInOut 1s forwards;
+  position: absolute;
+  top: 20px;
+  transition: opacity 0.5s ease; /* Плавный переход для улучшения анимации */
+}
+
+@keyframes fadeInOut {
+  0% {
+      opacity: 0;
+      transform: translateY(-10px);
+  }
+  50% {
+      opacity: 1;
+      transform: translateY(0);
+  }
+  100% {
+      opacity: 0;
+      transform: translateY(-10px);
+  }
+}
+
+.player-cover {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  margin-right: 15px;
+}
+
+.button-about{
+  color: #fff;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+}
+
+.player-title {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.player-artist {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-direction: column;
+}
+
+.player-button {
+  font-size: 24px;
+  color: #fff;
+}
+
+.player-progress {
+  flex-grow: 1;
+  margin: 0 20px;
+}
+
+progress {
+  width: 100%;
+  height: 5px;
+  border-radius: 5px;
+}
+
+progress::-webkit-progress-bar {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+}
+
+progress::-webkit-progress-value {
+  background-color: #007bff;
+  border-radius: 5px;
+}
+
+.player-volume {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-volume-icon {
+  font-size: 20px;
+  color: #fff;
+}
+
+.player-volume-slider {
+  width: 100px;
+}
+
+
+/* src/HeaderPage.css */
+.header-page {
+  position: relative;
+}
+
+.button-about {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7); /* Затемнение */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Поверх остальных элементов */
+}
+
+.info-panel {
+  background-color: rgba(50, 50, 50, 0.7); 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 24px;
+  padding: 20px;
+  animation: fadeIn 0.3s ease; /* Анимация появления */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.close-button {
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 10px;
+}
+
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+      transform: translateY(-20px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+.college-icon{
+  width: 100px;
+  height: 120px;
+}
+
+
+
+
+.auth-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.auth-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.auth-modal h1 {
+  margin: 0 0 10px;
+  font-size: 24px;
+}
+
+.auth-modal h2 {
+  margin: 0 0 20px;
+  font-size: 18px;
+}
+
+.auth-modal input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.auth-modal button {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+.auth-modal button:hover {
+  background: #0056b3;
+}
+
+.auth-modal p {
+  margin: 10px 0;
+}
+
+.auth-modal .close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #333;
+}
+
+.auth-modal .close-button:hover {
+  color: #000;
+}
