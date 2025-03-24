@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, query, where, getDocs, doc, updateDoc, getDoc, addDoc} = require('firebase/firestore');
+const { getFirestore, collection, query, where, getDocs, doc, updateDoc, getDoc, addDoc, Timestamp} = require('firebase/firestore');
 const upload = require('./multerConfig');
 const path = require('path');
 const fs = require('fs');
@@ -34,11 +34,16 @@ app.use('/public', express.static(path.join(__dirname, '../public')));
 
 // Регистрация пользователя
 app.post('/register', async (req, res) => {
-  const { email, nickname, password } = req.body;
+  const { email, nickname, password, country, isExecutor} = req.body;
 
   try {
     // Проверка, существует ли пользователь с таким email
-    const usersCollection = collection(db, 'users');
+    let usersCollection = null
+    if(isExecutor)
+      usersCollection = collection(db, "executors");
+    else
+      usersCollection = collection(db, 'users');
+  
     const q = query(usersCollection, where('email', '==', email));
     const querySnapshot = await getDocs(q);
 
@@ -47,13 +52,24 @@ app.post('/register', async (req, res) => {
     }
 
     // Создание нового пользователя
-    const newUser = {
-      email,
-      nickname,
-      password, // В реальном приложении пароль должен быть хэширован!
-      registration_date: new Date().toISOString(),
-      avatar: 'users avatars/default-avatar.png', // Базовая аватарка
-    };
+    let newUser = {}
+    if(isExecutor)
+      newUser = {
+        email,
+        nickname,
+        password, 
+        registration_date: Timestamp.now(),
+        avatar: 'users avatars/default-avatar.png',
+        country
+    }
+    else
+      newUser = {
+        email,
+        nickname,
+        password, 
+        registration_date: Timestamp.now(),
+        avatar: 'users avatars/default-avatar.png'
+      };
 
     const docRef = await addDoc(usersCollection, newUser);
     res.status(201).json({ id: docRef.id, ...newUser });
@@ -70,10 +86,14 @@ app.post('/login', async (req, res) => {
   try {
     const usersCollection = collection(db, 'users');
     const q = query(usersCollection, where('email', '==', email));
-    const querySnapshot = await getDocs(q);
+    let querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
-      return res.status(404).json({ message: 'Пользователь не найден' });
+      const executorsCollection = collection(db, 'executors')
+      const qexecutorsCollection = query(executorsCollection, where('email', '==', email));
+      querySnapshot = await getDocs(qexecutorsCollection);
+      if(querySnapshot.empty)
+        return res.status(404).json({ message: 'Пользователь не найден' });
     }
 
     const userDoc = querySnapshot.docs[0];
@@ -93,7 +113,7 @@ app.post('/login', async (req, res) => {
 // Загрузка аватарки
 app.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
   const { userId } = req.body;
-  const avatarPath = `users avatars/${req.file.filename}`; // Относительный путь к файлу
+  const avatarPath = `users-avatars/${req.file.filename}`; // Относительный путь к файлу
 
   try {
     const userRef = doc(db, 'users', userId);
@@ -119,6 +139,89 @@ app.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
   } catch (error) {
     console.error('Ошибка при загрузке аватарки:', error);
     res.status(500).json({ message: 'Ошибка при загрузке аватарки', error: error.message });
+  }
+});
+
+// Загрузка трека и альбома
+app.post('/upload-tracks', upload.fields([{ name: 'coverImage', maxCount: 1 }, { name: 'tracks', maxCount: 10 }]), async (req, res) => {
+  const { executorId, albumName, genre, trackNames } = req.body;
+
+  // Пути к файлам
+  const coverImagePath = `album-covers/${req.files['coverImage'][0].filename}`;
+
+  try {
+    // Создаем альбом
+    const albumData = {
+      executor_id: executorId,
+      name: albumName,
+      genre,
+      release_date: new Date().toISOString(),
+      image_src: coverImagePath,
+    };
+
+    const albumRef = await addDoc(collection(db, 'albums'), albumData);
+
+    // Создаем треки
+    const tracks = req.files['tracks'];
+    for (let i = 0; i < tracks.length; i++) {
+      const trackData = {
+        album_id: albumRef.id,
+        name: trackNames[i], // Используем название трека из trackNames
+        file_path: `tracks/${tracks[i].filename}`,
+        duration: 0, // Пока что оставляем 0, можно добавить логику для вычисления длительности трека
+        number_of_plays: 0,
+      };
+
+      await addDoc(collection(db, 'tracks'), trackData);
+    }
+
+    res.status(201).json({ message: 'Альбом и треки успешно загружены', albumId: albumRef.id });
+  } catch (error) {
+    console.error('Ошибка при загрузке альбома:', error);
+    res.status(500).json({ message: 'Ошибка при загрузке альбома', error: error.message });
+  }
+});
+
+// Получение данных об альбомах и треках
+app.get('/get-albums-and-tracks', async (req, res) => {
+  try {
+    // Получаем все альбомы
+    const albumsSnapshot = await getDocs(collection(db, 'albums'));
+    const albums = [];
+    for (const albumDoc of albumsSnapshot.docs) {
+      const albumData = albumDoc.data();
+
+      // Получаем данные исполнителя
+      const executorDoc = await getDoc(doc(db, 'executors', albumData.executor_id));
+      if (!executorDoc.exists()) {
+        console.error(`Исполнитель с ID ${albumData.executor_id} не найден`);
+        continue; // Пропускаем этот альбом, если исполнитель не найден
+      }
+      const executorData = executorDoc.data();
+
+      // Получаем треки для текущего альбома
+      const tracksSnapshot = await getDocs(query(collection(db, 'tracks'), where('album_id', '==', albumDoc.id)));
+      const tracks = [];
+      tracksSnapshot.forEach((trackDoc) => {
+        const trackData = trackDoc.data();
+        tracks.push({
+          id: trackDoc.id,
+          ...trackData,
+        });
+      });
+
+      albums.push({
+        id: albumDoc.id,
+        ...albumData,
+        executor: executorData.nickname, // Имя исполнителя
+        tracks,
+      });
+    }
+
+    res.status(200).json(albums);
+  } catch (error) {
+    console.error('Ошибка при получении данных:', error);
+    res.status(500).json({ message: 'Ошибка при получении данных', error: error.message });
   }
 });
 

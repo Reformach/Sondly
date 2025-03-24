@@ -1,13 +1,11 @@
-
-
-const PlayerInfo = () =>{
-    return(
-    <div class="player-info">
-        <img src="" alt="music-cover" />
-        <span class="player-title">Always you</span>
-        <span class="player-artist">Men Singer</span>
-    </div>
+const PlayerInfo = ({ coverImage, title, artist }) => {
+    return (
+      <div className="player-info">
+        <img src={coverImage} alt="music-cover" className="image-track-player"/>
+        <span className="player-title">{title}</span>
+        <span className="player-artist">{artist}</span>
+      </div>
     );
-   
-}
-export default PlayerInfo;
+  };
+  
+  export default PlayerInfo;

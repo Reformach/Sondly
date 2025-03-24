@@ -4,24 +4,65 @@ import DecorationPanel from "./main page components/DecorationPanel";
 import PageSwitchingButtons from "../common components/PageSwitchingButtons";
 import Chart from "./main page components/Chart";
 import Playlist from "./main page components/Playlists";
+import Statistics from "./main page components/Statistics";
+import UploadTrack from "../common components/UploadTrack";
 import Player from "../common components/Player";
 
+import { UserContext } from '../context/UserContext';
+import { PlayerProvider } from '../context/PlayerContext';
+import React, { useContext, useState } from 'react';
+
 const MainPage = () => {
-    return(
-    <>
-        <LeftPanel/>
-        <main className="content">
-            <HeaderPage/>
-            <PageSwitchingButtons/>
-            <DecorationPanel/>
-            <section class="main-content">
-                <Chart/>
-                <Playlist/>
-            </section>
-            <Player/>
-        </main>
-    </>
+    const { userData, setUserData } = useContext(UserContext);
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+    const handleCreateAlbumClick = () => {
+        setIsUploadModalOpen(true);
+    };
+
+    const handleCloseUploadModal = () => {
+        setIsUploadModalOpen(false);
+    };
+
+    return (
+        <PlayerProvider>
+            <>
+                <LeftPanel />
+                <main className="content">
+                    {userData.country ? (
+                        <>
+                            <HeaderPage />
+                            <PageSwitchingButtons />
+                            <DecorationPanel isExecutor={true} onCreateAlbumClick={handleCreateAlbumClick} />
+                            {isUploadModalOpen && (
+                            <UploadTrack onClose={handleCloseUploadModal} />
+                            )}
+                            <section className="main-content">
+                                <Statistics />
+                                <Playlist title={"Ваши альбомы"} titleBtn={"Показать больше"} hrefBtn={"/playlists"} />
+                            </section>
+                            <Player />
+                        </>
+                    ) : (
+                        <>
+                            <HeaderPage />
+                            <PageSwitchingButtons />
+                            <DecorationPanel isExecutor={false} />
+                            <section className="main-content">
+                                <Chart
+                                    title={"Чарт"}
+                                    titleBtn={"Показать больше"}
+                                    hrefBtn={"/charts"}
+                                />
+                                <Playlist />
+                            </section>
+                            <Player />
+                        </>
+                    )}
+                </main>
+            </>
+        </PlayerProvider>
     );
-    
-}
+};
+
 export default MainPage;

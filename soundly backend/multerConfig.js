@@ -1,10 +1,15 @@
 const multer = require('multer');
 const path = require('path');
 
-// Настройка multer для сохранения файлов в папку public/users-avatars
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../soundly/public/users avatars')); // Правильный путь
+    if (file.fieldname === 'avatar') {
+      cb(null, path.join(__dirname, '../soundly/public/users-avatars')); // Папка для аватарок
+    } else if (file.fieldname === 'coverImage') {
+      cb(null, path.join(__dirname, '../soundly/public/album-covers')); // Папка для обложек
+    } else if (file.fieldname === 'tracks') {
+      cb(null, path.join(__dirname, '../soundly/public/tracks')); // Папка для треков
+    }
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -12,12 +17,15 @@ const storage = multer.diskStorage({
   },
 });
 
-// Фильтр для проверки типа файла (только изображения)
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
+  if (file.fieldname === 'avatar' && file.mimetype.startsWith('image/')) {
+    cb(null, true); // Принимаем только изображения для аватарок
+  } else if (file.fieldname === 'coverImage' && file.mimetype.startsWith('image/')) {
+    cb(null, true); // Принимаем только изображения для обложек
+  } else if (file.fieldname === 'tracks' && file.mimetype.startsWith('audio/')) {
+    cb(null, true); // Принимаем только аудиофайлы для треков
   } else {
-    cb(new Error('Можно загружать только изображения!'), false);
+    cb(new Error('Неподдерживаемый тип файла!'), false);
   }
 };
 

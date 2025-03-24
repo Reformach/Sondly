@@ -1,10 +1,12 @@
 import './App.css';
 import MainPage from './modules/pages/MainPage';
-import FavoritePage from './modules/pages/FavoritePage';
+import TracksPage from './modules/pages/TracksPage';
 import {React, useState} from 'react';
 import { UserProvider } from './modules/context/UserContext';
 import Authentication from './modules/common components/Authentication'; 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import PlaylistsPage from './modules/pages/PlaylistsPage';
+import { useContext, useEffect } from 'react';
 
 const App = () => {
 
@@ -13,16 +15,15 @@ const App = () => {
     setIsAuthModalOpen(false); // Закрываем модальное окно
   };
   return (
-    <UserProvider> {/* Оборачиваем все приложение в UserProvider */}
+    <UserProvider>
       <Router>
-        {/* Показываем модальное окно аутентификации, если оно открыто */}
         {isAuthModalOpen && (
           <Authentication onAuthSuccess={handleAuthSuccess} onClose={() => setIsAuthModalOpen(false)} />
         )}
-
         <Routes>
           <Route path="/" element={<MainPage />} />
-          <Route path="/favorite" element={<FavoritePage />} />
+          <Route path="/favorite" element={<TracksPage description={"Избранное"}  titleTracklist={"Треки"}/>} />
+          <Route path="/playlists" element={<PlaylistsPage description={"Избранное"}  titleTracklist={"Треки"}/>} />
         </Routes>
       </Router>
     </UserProvider>

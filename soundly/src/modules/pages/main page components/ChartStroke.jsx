@@ -1,28 +1,28 @@
-import { Icon } from "@iconify/react";
+import { Icon } from '@iconify/react';
 
-const ChartStroke = () => {
-    return(
-        <li class="chart-stroke">
-            <div class="name-and-description">
-                <img src="images/Music label.png"/>
-                <div class="description-container">
-                    <span class="chart-title">Always you</span>
-                    <span class="chart-artist">Men Singer</span>
+const ChartStroke = ({ coverImage, title, artist, duration, onClick }) => {
+    return (
+        <li className="chart-stroke">
+            <div className="name-and-description">
+                <img src={coverImage} alt="Обложка альбома" className='image-track'/>
+                <div className="description-container">
+                    <span className="chart-title">{title}</span>
+                    <span className="chart-artist">{artist}</span>
                 </div>
             </div>
-            <div class="chart-interaction">
-                <button class="play-music">
-                    <Icon icon="solar:play-line-duotone" className="play-button-icon-chart"/>
+            <div className="chart-interaction">
+                <button className="play-music" onClick={onClick}>
+                    <Icon icon="solar:play-line-duotone" className="play-button-icon-chart" />
                 </button>
-                <div class="like-and-time">
-                    <button class="like-button">
-                       <Icon icon="solar:heart-outline" className="like-button-icon"/>
+                <div className="like-and-time">
+                    <button className="like-button">
+                        <Icon icon="solar:heart-outline" className="like-button-icon" />
                     </button>
-                    <p>3:42</p>
+                    <p>{duration}</p>
                 </div>
             </div>
-           
         </li>
     );
-}
+};
+
 export default ChartStroke;

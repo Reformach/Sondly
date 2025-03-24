@@ -2,25 +2,32 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
 import WelcomePanel from './WelcomePanel';
+import '../css files/authentication.css';
 
-function Authentication({onClose}) {
-
+function Authentication({ onClose }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userId, setUserId] = useState(null); // ID пользователя
+  const [isExecutor, setExecutor] = useState(false);
+  const [country, setCountry] = useState('');
 
   const { setUserData } = useContext(UserContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const userData = isLogin
-      ? { email, password }
-      : { email, nickname, password };
+    let userData = {};
+
+    if (isLogin) {
+      userData = { email, password };
+    } else if (!isLogin && !isExecutor) {
+      userData = { email, nickname, password, isExecutor };
+    } else if (!isLogin && isExecutor) {
+      userData = { email, nickname, password, country, isExecutor };
+    }
 
     try {
       const endpoint = isLogin ? '/login' : '/register';
@@ -29,7 +36,6 @@ function Authentication({onClose}) {
       if (response.status === 200 || response.status === 201) {
         console.log(isLogin ? 'Вход выполнен:' : 'Регистрация успешна:', response.data);
         setUserData(response.data);
-        setUserId(response.data.id); // Сохраняем ID пользователя
         setIsAuthenticated(true);
       }
     } catch (error) {
@@ -41,10 +47,11 @@ function Authentication({onClose}) {
       }
     }
   };
+
   return (
     <div className="auth-modal-overlay">
       {isAuthenticated ? (
-       <WelcomePanel onClose={onClose}/>
+        <WelcomePanel onClose={onClose} />
       ) : (
         <div className="auth-modal">
           <h1>Soundly</h1>
@@ -59,13 +66,36 @@ function Authentication({onClose}) {
               required
             />
             {!isLogin && (
-              <input
-                type="text"
-                placeholder="Никнейм"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                required
-              />
+              <div className="nicname-and-checkmark">
+                <input
+                  type="text"
+                  placeholder="Никнейм"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  required
+                />
+                <input
+                  id="executor"
+                  type="checkbox"
+                  checked={isExecutor}
+                  onChange={(e) => {
+                    setExecutor(e.target.checked);
+                    if (!e.target.checked) {
+                      setCountry(''); // Сбрасываем значение country, если чекбокс отключен
+                    }
+                  }}
+                />
+                <label htmlFor="executor">Вы музыкант?</label>
+                {isExecutor && (
+                  <input
+                    id="country"
+                    type="text"
+                    placeholder="Страна происхождения"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                  />
+                )}
+              </div>
             )}
             <input
               type="password"

@@ -1,21 +1,19 @@
 import PlaylistStroke from "./PlaylistStroke";
 
-const Playlists = () => {
+const Playlists = ({title, titleBtn, hrefBtn}) => {
     return(
         <section class="playlists">
-            <div className="playlist-header">
-                <h2>Плейлисты</h2> 
-                <button className="more-see">
-                    <p className="more-see-text">Показать больше</p>
-                </button>
+            <div className="chart-header">
+                <h2>{title}</h2> 
+                <a className={hrefBtn}>{titleBtn}</a>
             </div>
+            <div className="line-header-chart"></div>
             <ul className="playlist-list">
                 <PlaylistStroke/>
                 <PlaylistStroke/>
             </ul>
         </section>
         
-    );
-   
+    ); 
 }
 export default Playlists;
