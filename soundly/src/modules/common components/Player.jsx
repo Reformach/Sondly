@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import PlayerButton from './player/PlayerButton';
 import PlayerInfo from './player/PlayerInfo';
 import PlayerSound from './player/PlayerSound';
+import Equalizer from './Equalizer';
 import { PlayerContext } from '../context/PlayerContext';
+import { Icon } from '@iconify/react';
 
 const Player = () => {
     const {
@@ -13,75 +15,137 @@ const Player = () => {
         nextTrack,
         previousTrack,
     } = useContext(PlayerContext);
-    
+
     const [volume, setVolume] = useState(50);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
-    
-    const audioRef = useRef(null);
+    const [showEqualizer, setShowEqualizer] = useState(false);
+    const [eqSettings, setEqSettings] = useState({
+        low: 0,
+        mid: 0,
+        high: 0
+    });
 
-    // Загружаем новый трек только при его смене
+    const audioRef = useRef(new Audio());
+    const audioContextRef = useRef(null);
+    const sourceNodeRef = useRef(null);
+    const filtersRef = useRef({
+        low: null,
+        mid: null,
+        high: null
+    });
+
+    const initAudioNodes = () => {
+        if (!audioContextRef.current) {
+            audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+
+            filtersRef.current = {
+                low: audioContextRef.current.createBiquadFilter(),
+                mid: audioContextRef.current.createBiquadFilter(),
+                high: audioContextRef.current.createBiquadFilter()
+            };
+
+            filtersRef.current.low.type = 'lowshelf';
+            filtersRef.current.low.frequency.value = 150;
+            filtersRef.current.low.gain.value = eqSettings.low;
+
+            filtersRef.current.mid.type = 'peaking';
+            filtersRef.current.mid.frequency.value = 1000;
+            filtersRef.current.mid.Q.value = 1;
+            filtersRef.current.mid.gain.value = eqSettings.mid;
+
+            filtersRef.current.high.type = 'highshelf';
+            filtersRef.current.high.frequency.value = 4000;
+            filtersRef.current.high.gain.value = eqSettings.high;
+
+            sourceNodeRef.current = audioContextRef.current.createMediaElementSource(audioRef.current);
+            sourceNodeRef.current.connect(filtersRef.current.low);
+            filtersRef.current.low.connect(filtersRef.current.mid);
+            filtersRef.current.mid.connect(filtersRef.current.high);
+            filtersRef.current.high.connect(audioContextRef.current.destination);
+        }
+    };
+
     useEffect(() => {
-        if (audioRef.current && currentTrack) {
-            audioRef.current.src = currentTrack.file_path;
-            audioRef.current.load();
-            audioRef.current.play();
+        const audio = audioRef.current;
+
+        const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+        const handleLoadedMetadata = () => setDuration(audio.duration);
+
+        audio.addEventListener('timeupdate', handleTimeUpdate);
+        audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+        audio.addEventListener('ended', handleStop);
+
+        // Восстановление настроек эквалайзера из localStorage
+        const savedEqSettings = localStorage.getItem('eqSettings');
+        if (savedEqSettings) {
+            setEqSettings(JSON.parse(savedEqSettings));
+        }
+
+        return () => {
+            audio.removeEventListener('timeupdate', handleTimeUpdate);
+            audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+            audio.removeEventListener('ended', handleStop);
+        };
+    }, [handleStop]);
+
+    useEffect(() => {
+        if (!currentTrack) return;
+
+        const audio = audioRef.current;
+        audio.src = currentTrack.file_path;
+        audio.load();
+
+        const playAudio = async () => {
+            try {
+                initAudioNodes();
+                await audio.play();
+            } catch (err) {
+                console.error("Playback error:", err);
+            }
+        };
+
+        if (isPlaying) {
+            playAudio();
         }
     }, [currentTrack]);
 
-    // Управляем воспроизведением
     useEffect(() => {
-        if (audioRef.current) {
-            if (isPlaying) {
-                audioRef.current.play();
-            } else {
-                audioRef.current.pause();
-            }
-        }
-    }, [isPlaying]);
+        if (!currentTrack) return;
 
-    // Устанавливаем громкость
+        const audio = audioRef.current;
+        const controlPlayback = async () => {
+            try {
+                if (isPlaying) {
+                    if (audioContextRef.current?.state === 'suspended') {
+                        await audioContextRef.current.resume();
+                    }
+                    await audio.play();
+                } else {
+                    audio.pause();
+                }
+            } catch (err) {
+                console.error("Playback control error:", err);
+            }
+        };
+
+        controlPlayback();
+    }, [isPlaying, currentTrack]);
+
     useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.volume = volume / 100;
-        }
+        audioRef.current.volume = volume / 100;
     }, [volume]);
 
-    // Обновление текущего времени трека
-    useEffect(() => {
-        const audio = audioRef.current;
-        if (audio) {
-            const updateTime = () => {
-                setCurrentTime(audio.currentTime);
-            };
-            audio.addEventListener('timeupdate', updateTime);
-            return () => {
-                audio.removeEventListener('timeupdate', updateTime);
-            };
-        }
-    }, []);
+    const handleEqualizerChange = (band, value) => {
+        const newValue = parseFloat(value);
+        const newSettings = { ...eqSettings, [band]: newValue };
 
-    // Получение продолжительности трека
-    const handleLoadedMetadata = () => {
-        if (audioRef.current) {
-            setDuration(audioRef.current.duration);
-        }
-    };
+        setEqSettings(newSettings);
+        localStorage.setItem('eqSettings', JSON.stringify(newSettings));
 
-    // Обработчик перемотки
-    const handleSeek = (e) => {
-        const newTime = e.target.value;
-        setCurrentTime(newTime);
-        if (audioRef.current) {
-            audioRef.current.currentTime = newTime;
+        if (filtersRef.current[band]) {
+            filtersRef.current[band].gain.value = newValue;
         }
-    };
-
-    // Форматирование времени в "минуты:секунды"
-    const formatTime = (time) => {
-        const minutes = Math.floor(time / 60);
-        const seconds = Math.floor(time % 60);
-        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
 
     if (!currentTrack) {
@@ -101,28 +165,30 @@ const Player = () => {
                 onNext={nextTrack}
                 onPrevious={previousTrack}
                 isPlaying={isPlaying}
+                currentTime={currentTime}
+                duration={duration}
+                onSeek={(newTime) => {
+                    setCurrentTime(newTime);
+                    audioRef.current.currentTime = newTime;
+                }}
             />
-
-            {/* Прогресс-бар */}
-            <div className="progress-container">
-                <span>{formatTime(currentTime)}</span>
-                <input
-                    type="range"
-                    min="0"
-                    max={duration}
-                    value={currentTime}
-                    onChange={handleSeek}
-                />
-                <span>{formatTime(duration)}</span>
-            </div>
 
             <PlayerSound volume={volume} onVolumeChange={setVolume} />
 
-            <audio 
-                ref={audioRef} 
-                onEnded={handleStop} 
-                onLoadedMetadata={handleLoadedMetadata} 
-            />
+            <button
+                onClick={() => setShowEqualizer(!showEqualizer)}
+                className="equalizer-toggle"
+            >
+                <Icon icon={showEqualizer ? "mdi:chevron-up" : "mdi:equalizer"} />
+                {showEqualizer ? 'Скрыть эквалайзер' : 'Эквалайзер'}
+            </button>
+
+            {showEqualizer && (
+                <Equalizer
+                    onChange={handleEqualizerChange}
+                    initialValues={eqSettings}
+                />
+            )}
         </div>
     );
 };

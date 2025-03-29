@@ -7,7 +7,6 @@ const PlayerSound = ({ volume, onVolumeChange }) => {
   const handleVolumeChange = (event) => {
     onVolumeChange(event.target.value);
     setIsVisible(true);
-    console.log(volume)
   };
 
   const handleVolumeMute = () =>{
@@ -33,7 +32,7 @@ const PlayerSound = ({ volume, onVolumeChange }) => {
         {volume === 0 ? (
           <Icon icon="solar:volume-cross-linear" className="icon-navigation" onClick={handleVolumeReload}/>
         ) : (
-          <Icon icon="solar:volume-loud-linear" className="icon-navigation" onClick={handleVolumeReload}/>
+          <Icon icon="solar:volume-loud-linear" className="icon-navigation" onClick={handleVolumeMute}/>
         )}
         <input
           type="range"
