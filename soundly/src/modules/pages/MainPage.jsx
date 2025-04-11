@@ -53,6 +53,7 @@ const MainPage = () => {
                                     title={"Чарт"}
                                     titleBtn={"Показать больше"}
                                     hrefBtn={"/charts"}
+                                    isFavorite={false}
                                 />
                                 <Playlist />
                             </section>

@@ -16,7 +16,6 @@ const PlaylistsPage = ({description, titleTracklist}) =>{
             <section class="main-content">
                 <Playlists/>
             </section>
-            <Player/>
         </main>
         </>
     )

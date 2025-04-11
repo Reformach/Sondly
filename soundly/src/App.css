@@ -357,6 +357,137 @@ button{
   color: rgba(255, 255, 255, 0.7);
 }
 
+/* Стили для кликабельного имени исполнителя */
+.chart-artist.clickable {
+  cursor: pointer;
+  color: var(--accent-color);
+  transition: all 0.3s ease;
+}
+
+.chart-artist.clickable:hover {
+  text-decoration: underline;
+  opacity: 0.8;
+}
+
+/* Стили для страницы исполнителя */
+.executor-header {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  margin-bottom: 30px;
+  border-radius: 12px;
+  background-color: rgba(137, 103, 237, 0.1);
+}
+
+.executor-avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 30px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.executor-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.executor-info {
+  flex: 1;
+}
+
+.executor-name {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: var(--light-text);
+}
+
+.executor-bio {
+  font-size: 16px;
+  color: var(--light-text);
+  opacity: 0.8;
+  line-height: 1.5;
+  max-width: 80%;
+}
+
+.albums-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.album-card {
+  background-color: var(--panel-bg);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.album-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.album-cover {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.album-info {
+  padding: 15px;
+}
+
+.album-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: var(--light-text);
+}
+
+.album-year, .tracks-count {
+  display: block;
+  font-size: 14px;
+  color: var(--light-text);
+  opacity: 0.7;
+  margin-top: 5px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 30px 0 15px;
+  color: var(--light-text);
+}
+
+.executor-albums {
+  margin-top: 40px;
+}
+
+.no-albums-message {
+  color: var(--light-text);
+  opacity: 0.7;
+  font-style: italic;
+  padding: 20px;
+  text-align: center;
+}
+
+.loading-message, .error-message {
+  color: var(--light-text);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.error-message {
+  color: #ff6347; /* tomato */
+}
+
 /* Плейлисты */
 .playlists {
   margin-bottom: 30px;
@@ -728,4 +859,389 @@ progress::-webkit-progress-value {
 .eq-icon {
   color: #888;
   font-size: 24px;
+}
+
+
+
+/* Добавить в существующий файл стилей */
+
+.header-buttons-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-menu-container {
+  position: relative;
+}
+
+.user-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-color);
+  transition: all 0.2s;
+}
+
+.user-button:hover {
+  color: var(--accent-color);
+}
+
+.user-name {
+  font-size: 14px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: var(--panel-bg);
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  min-width: 150px;
+  margin-top: 5px;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+  padding: 10px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-color);
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
+}
+
+.icon-logout {
+  font-size: 18px;
+}
+
+
+
+
+
+
+
+
+
+/* Добавить в существующий CSS файл */
+
+.add-playlist {
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-playlist:hover {
+  border-color: var(--accent-color);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.add-playlist-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  height: 100%;
+}
+
+.add-playlist-icon {
+  font-size: 36px;
+  margin-bottom: 10px;
+  color: var(--accent-color);
+}
+
+.modal-create-playlist {
+  background-color: var(--panel-bg);
+  border-radius: 12px;
+  padding: 25px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.modal-create-playlist h2 {
+  margin-bottom: 20px;
+  text-align: center;
+  color: var(--text-color);
+}
+
+.form-field {
+  margin-bottom: 15px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: var(--secondary-text-color);
+}
+
+.form-field input,
+.form-field textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background-color: rgba(0, 0, 0, 0.2);
+  color: var(--text-color);
+  font-size: 16px;
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.create-playlist-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 10px;
+}
+
+.create-playlist-btn:hover {
+  background-color: var(--accent-color-hover);
+}
+
+.create-playlist-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #ff3b30;
+  font-size: 14px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+
+
+
+
+
+/* Стили для кнопки добавления в плейлист */
+.add-to-playlist-button {
+  background: none;
+  border: none;
+  padding: 5px;
+  margin: 0 5px;
+  cursor: pointer;
+  color: var(--text-color);
+  opacity: 0.7;
+  transition: all 0.2s;
+}
+
+.add-to-playlist-button:hover {
+  opacity: 1;
+  color: var(--accent-color);
+}
+
+.add-to-playlist-icon {
+  font-size: 18px;
+}
+
+/* Модальное окно выбора плейлиста */
+.playlist-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.playlist-select-modal {
+  background-color: var(--panel-bg);
+  width: 90%;
+  max-width: 450px;
+  border-radius: 12px;
+  padding: 20px;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.playlist-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.playlist-modal-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.track-info-container {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.track-modal-cover {
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.track-modal-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.track-modal-title {
+  font-weight: 500;
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.track-modal-artist {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.playlists-container {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.playlists-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.playlist-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.playlist-option:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.playlist-option-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.playlist-option-name {
+  font-weight: 500;
+  font-size: 15px;
+  margin-bottom: 3px;
+}
+
+.playlist-option-count {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.add-to-playlist-btn {
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.add-to-playlist-btn:hover {
+  transform: scale(1.1);
+}
+
+.add-to-playlist-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.no-playlists-message {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.no-playlists-message p {
+  margin-bottom: 15px;
+  opacity: 0.7;
+}
+
+.create-playlist-btn {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.create-playlist-btn:hover {
+  background-color: var(--accent-color-hover);
+}
+
+.loading-text {
+  text-align: center;
+  padding: 20px 0;
+  opacity: 0.7;
+}
+
+/* Анимация для модального окна */
+@keyframes fadeInUp {
+  from {
+      opacity: 0;
+      transform: translateY(20px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
 }

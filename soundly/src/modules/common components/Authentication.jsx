@@ -14,28 +14,31 @@ function Authentication({ onClose }) {
   const [isExecutor, setExecutor] = useState(false);
   const [country, setCountry] = useState('');
 
-  const { setUserData } = useContext(UserContext);
+  const {userData, setUserData, loadFavorites } = useContext(UserContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let userData = {};
+    let userDataForm = {};
 
     if (isLogin) {
-      userData = { email, password };
+      userDataForm = { email, password };
     } else if (!isLogin && !isExecutor) {
-      userData = { email, nickname, password, isExecutor };
+      userDataForm = { email, nickname, password, isExecutor };
     } else if (!isLogin && isExecutor) {
-      userData = { email, nickname, password, country, isExecutor };
+      userDataForm = { email, nickname, password, country, isExecutor };
     }
 
     try {
       const endpoint = isLogin ? '/login' : '/register';
-      const response = await axios.post('http://localhost:4000' + endpoint, userData);
+      const response = await axios.post('http://localhost:4000' + endpoint, userDataForm);
 
       if (response.status === 200 || response.status === 201) {
         console.log(isLogin ? 'Вход выполнен:' : 'Регистрация успешна:', response.data);
         setUserData(response.data);
+        if (!isExecutor) {
+          loadFavorites(response.data.id);
+        }
         setIsAuthenticated(true);
       }
     } catch (error) {
