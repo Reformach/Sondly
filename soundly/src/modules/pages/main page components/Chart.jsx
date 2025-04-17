@@ -4,9 +4,10 @@ import ChartStroke from './ChartStroke';
 import { PlayerContext } from '../../context/PlayerContext';
 import { UserContext } from '../../context/UserContext';
 
-const Chart = ({ title, titleBtn, hrefBtn, isFavorites, playlistId, playlist, customTracks }) => {
+const Chart = ({ title, titleBtn, hrefBtn, isFavorites, playlistId, playlist, customTracks, isTopChart, limit = 10 }) => {
     const [albums, setAlbums] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [topTracks, setTopTracks] = useState([]);
     const { userData, loadFavorites } = useContext(UserContext);
     const { handleTrackSelect, setTracks } = useContext(PlayerContext);
 
@@ -60,10 +61,20 @@ const Chart = ({ title, titleBtn, hrefBtn, isFavorites, playlistId, playlist, cu
         const fetchData = async () => {
             setLoading(true);
             try {
+                // Если это компонент с популярными треками
+                if (isTopChart) {
+                    // Запрашиваем топ треков по количеству прослушиваний
+                    const response = await axios.get(`http://localhost:4000/get-top-tracks?limit=${limit}`);
+                    
+                    // Нормализуем треки
+                    const normalizedTracks = response.data.map(normalizeTrack);
+                    
+                    // Устанавливаем треки в состояние и контекст плеера
+                    setTopTracks(normalizedTracks);
+                    setTracks(normalizedTracks);
+                }
                 // Если переданы пользовательские треки, используем их
-                if (customTracks && customTracks.length > 0) {
-                    console.log("Используем пользовательские треки:", customTracks);
-                    // Нормализуем пользовательские треки
+                else if (customTracks && customTracks.length > 0) {
                     const normalizedTracks = customTracks.map(normalizeTrack);
                     setTracks(normalizedTracks);
                 } else if (isFavorites) {
@@ -107,7 +118,7 @@ const Chart = ({ title, titleBtn, hrefBtn, isFavorites, playlistId, playlist, cu
         };
 
         fetchData();
-    }, [isFavorites, userData.id, playlistId, playlist, customTracks]);
+    }, [isFavorites, userData.id, playlistId, playlist, customTracks, isTopChart, limit, setTracks]);
 
     if (loading) {
         return <div className="loading-message">Загрузка...</div>;
@@ -161,6 +172,25 @@ const Chart = ({ title, titleBtn, hrefBtn, isFavorites, playlistId, playlist, cu
                         ))
                     ) : (
                         <div className="empty-message">В этом плейлисте нет треков</div>
+                    )
+                ) : isTopChart ? (
+                    // Для isTopChart используем topTracks из состояния
+                    topTracks.length > 0 ? (
+                        topTracks.map((track, index) => (
+                            <ChartStroke
+                                key={track.id}
+                                coverImage={track.album?.image_src || '/default-cover.jpg'}
+                                title={track.name || track.title || 'Неизвестный трек'}
+                                artist={track.album?.executor_name || track.album?.executor || 'Неизвестный исполнитель'}
+                                duration={track.duration}
+                                onClick={() => handleTrackSelect({...track, album: track.album})}
+                                trackId={track.id}
+                                playCount={track.number_of_plays || 0}
+                                position={index + 1}
+                            />
+                        ))
+                    ) : (
+                        <div className="empty-message">Нет данных о популярных треках</div>
                     )
                 ) : customTracks && customTracks.length > 0 ? (
                     // Отображаем пользовательские треки

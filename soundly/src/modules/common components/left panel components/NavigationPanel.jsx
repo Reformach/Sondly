@@ -34,6 +34,10 @@ const NavigationPanel = () => {
                         <a href="/playlists" className="nav-link">Плейлисты</a>
                     </li>
                     <li>
+                        <Icon icon="solar:music-note-2-bold" className="icon-navigation"/>
+                        <a href="/genres" className="nav-link">Жанры</a>
+                    </li>
+                    <li>
                         <Icon icon="solar:heart-outline" className="icon-navigation"/>
                         <a href="/favorite" className="nav-link">Избранное</a>
                     </li>

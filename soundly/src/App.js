@@ -7,6 +7,8 @@ import Authentication from './modules/common components/Authentication';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import PlaylistsPage from './modules/pages/PlaylistsPage';
 import ExecutorPage from './modules/pages/ExecutorPage';
+import GenresPage from './modules/pages/GenresPage';
+import GenreTracksPage from './modules/pages/GenreTracksPage';
 
 const AppContent = () => {
   const { userData } = useContext(UserContext);
@@ -27,6 +29,8 @@ const AppContent = () => {
         <Route path="/playlists" element={<PlaylistsPage description={"Плейлисты"} titleTracklist={"Треки"}/>} />
         <Route path="/playlist/:playlistId" element={<TracksPage description={"Треки"} titleTracklist={"Треки"} isFavorite={false}/>} />
         <Route path="/executor/:executorId" element={<ExecutorPage />} />
+        <Route path="/genres" element={<GenresPage />} />
+        <Route path="/genre/:genreId" element={<GenreTracksPage />} />
       </Routes>
     </>
   );

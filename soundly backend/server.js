@@ -686,6 +686,191 @@ app.get('/get-executor-by-name', async (req, res) => {
   }
 });
 
+// Поиск треков по названию
+app.get('/search-tracks', async (req, res) => {
+  const { query } = req.query;
+  
+  if (!query) {
+    return res.status(400).json({ message: 'Требуется поисковый запрос' });
+  }
+  
+  try {
+    // Получаем все треки из базы данных
+    const tracksSnapshot = await getDocs(collection(db, 'tracks'));
+    const matchedTracks = [];
+    
+    // Обрабатываем каждый трек для поиска совпадений
+    for (const trackDoc of tracksSnapshot.docs) {
+      const trackData = trackDoc.data();
+      
+      // Проверяем наличие поля name
+      if (!trackData.name) {
+        continue; // Пропускаем треки без названия
+      }
+      
+      const trackName = trackData.name.toLowerCase();
+      
+      // Проверяем, содержит ли название трека поисковый запрос
+      if (trackName.includes(query.toLowerCase())) {
+        // Получаем данные альбома для трека
+        const albumDoc = await getDoc(doc(db, 'albums', trackData.album_id));
+        
+        if (albumDoc.exists()) {
+          const albumData = albumDoc.data();
+          
+          // Получаем данные исполнителя
+          let executorData = null;
+          if (albumData.executor_id) {
+            // Сначала ищем в коллекции users
+            let executorDoc = await getDoc(doc(db, 'users', albumData.executor_id));
+            
+            // Если не нашли, ищем в коллекции executors
+            if (!executorDoc.exists()) {
+              executorDoc = await getDoc(doc(db, 'executors', albumData.executor_id));
+            }
+            
+            if (executorDoc.exists()) {
+              executorData = executorDoc.data();
+            }
+          }
+          
+          // Добавляем трек в результаты поиска с данными альбома и исполнителя
+          matchedTracks.push({
+            id: trackDoc.id,
+            ...trackData,
+            album: {
+              id: albumDoc.id,
+              name: albumData.name,
+              image_src: albumData.image_src,
+              executor: executorData ? executorData.nickname : 'Неизвестный исполнитель',
+              executor_name: executorData ? executorData.nickname : 'Неизвестный исполнитель',
+              executor_id: albumData.executor_id
+            }
+          });
+        }
+      }
+    }
+    
+    res.status(200).json(matchedTracks);
+  } catch (error) {
+    console.error('Ошибка при поиске треков:', error);
+    res.status(500).json({
+      message: 'Ошибка при поиске треков',
+      error: error.message
+    });
+  }
+});
+
+// Обновление счетчика прослушиваний трека
+app.post('/increment-track-plays', async (req, res) => {
+  const { trackId } = req.body;
+  
+  if (!trackId) {
+    return res.status(400).json({ message: 'Требуется ID трека' });
+  }
+  
+  try {
+    const trackRef = doc(db, 'tracks', trackId);
+    const trackDoc = await getDoc(trackRef);
+    
+    if (!trackDoc.exists()) {
+      return res.status(404).json({ message: 'Трек не найден' });
+    }
+    
+    // Получаем текущее количество прослушиваний
+    const trackData = trackDoc.data();
+    const currentPlays = trackData.number_of_plays || 0;
+    
+    // Увеличиваем счетчик на 1
+    await updateDoc(trackRef, {
+      number_of_plays: currentPlays + 1
+    });
+    
+    res.status(200).json({ 
+      success: true,
+      message: 'Счетчик прослушиваний обновлен',
+      plays: currentPlays + 1
+    });
+  } catch (error) {
+    console.error('Ошибка при обновлении счетчика прослушиваний:', error);
+    res.status(500).json({
+      message: 'Ошибка при обновлении счетчика прослушиваний',
+      error: error.message
+    });
+  }
+});
+
+// Получение топ-треков (чарт)
+app.get('/get-top-tracks', async (req, res) => {
+  const { limit = 10 } = req.query; // По умолчанию возвращаем топ-10 треков
+  
+  try {
+    // Получаем все треки
+    const tracksSnapshot = await getDocs(collection(db, 'tracks'));
+    const tracks = [];
+    
+    // Собираем данные о треках
+    for (const trackDoc of tracksSnapshot.docs) {
+      const trackData = trackDoc.data();
+      
+      // Пропускаем треки без названия
+      if (!trackData.name) continue;
+      
+      // Получаем данные альбома
+      const albumDoc = await getDoc(doc(db, 'albums', trackData.album_id));
+      
+      if (albumDoc.exists()) {
+        const albumData = albumDoc.data();
+        
+        // Получаем данные исполнителя
+        let executorData = null;
+        if (albumData.executor_id) {
+          // Сначала ищем в коллекции users
+          let executorDoc = await getDoc(doc(db, 'users', albumData.executor_id));
+          
+          // Если не нашли, ищем в коллекции executors
+          if (!executorDoc.exists()) {
+            executorDoc = await getDoc(doc(db, 'executors', albumData.executor_id));
+          }
+          
+          if (executorDoc.exists()) {
+            executorData = executorDoc.data();
+          }
+        }
+        
+        // Добавляем трек с информацией об альбоме и исполнителе
+        tracks.push({
+          id: trackDoc.id,
+          ...trackData,
+          number_of_plays: trackData.number_of_plays || 0, // Если нет прослушиваний, устанавливаем 0
+          album: {
+            id: albumDoc.id,
+            name: albumData.name,
+            image_src: albumData.image_src,
+            executor: executorData ? executorData.nickname : 'Неизвестный исполнитель',
+            executor_name: executorData ? executorData.nickname : 'Неизвестный исполнитель',
+            executor_id: albumData.executor_id
+          }
+        });
+      }
+    }
+    
+    // Сортируем треки по количеству прослушиваний (по убыванию)
+    tracks.sort((a, b) => b.number_of_plays - a.number_of_plays);
+    
+    // Ограничиваем количество результатов
+    const topTracks = tracks.slice(0, parseInt(limit));
+    
+    res.status(200).json(topTracks);
+  } catch (error) {
+    console.error('Ошибка при получении топ-треков:', error);
+    res.status(500).json({
+      message: 'Ошибка при получении топ-треков',
+      error: error.message
+    });
+  }
+});
+
 // Запуск сервера
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

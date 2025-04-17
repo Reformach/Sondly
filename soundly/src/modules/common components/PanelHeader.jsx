@@ -4,7 +4,6 @@ const PanelHeader = ({description}) => {
         <div class="about-section">
             <p>{description}</p>
         </div>
-        {/* <img className="image-decoration" src="images/Music decoration.png" alt="music-decoration"/> */}
     </div>
     );
 }

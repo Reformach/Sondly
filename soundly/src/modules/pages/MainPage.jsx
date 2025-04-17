@@ -50,10 +50,11 @@ const MainPage = () => {
                             <DecorationPanel isExecutor={false} />
                             <section className="main-content">
                                 <Chart
-                                    title={"Чарт"}
+                                    title={"Популярное сейчас"}
                                     titleBtn={"Показать больше"}
                                     hrefBtn={"/charts"}
-                                    isFavorite={false}
+                                    limit={5}
+                                    isTopChart={true}
                                 />
                                 <Playlist />
                             </section>

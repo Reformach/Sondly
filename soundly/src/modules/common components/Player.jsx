@@ -5,6 +5,7 @@ import PlayerSound from './player/PlayerSound';
 import Equalizer from './Equalizer';
 import { PlayerContext } from '../context/PlayerContext';
 import { Icon } from '@iconify/react';
+import axios from 'axios';
 
 const Player = () => {
     const {
@@ -38,6 +39,10 @@ const Player = () => {
 
     // Добавим переменную для отслеживания первоначальной загрузки трека
     const currentTrackIdRef = useRef(null);
+
+    // Добавляем новые состояния для отслеживания прослушиваний
+    const playTimeThreshold = 5; // Порог в секундах для засчитывания прослушивания
+    const playCountRecordedRef = useRef(false); // Флаг для отслеживания, было ли уже засчитано прослушивание
 
     const initAudioNodes = () => {
         if (!audioContextRef.current) {
@@ -85,7 +90,19 @@ const Player = () => {
     useEffect(() => {
         const audio = audioRef.current;
 
-        const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+        const handleTimeUpdate = () => {
+            setCurrentTime(audio.currentTime);
+            
+            // Проверяем, если пользователь прослушал трек более 5 секунд и прослушивание еще не засчитано
+            if (currentTrack && audio.currentTime >= playTimeThreshold && !playCountRecordedRef.current) {
+                // Отмечаем, что прослушивание было засчитано
+                playCountRecordedRef.current = true;
+                
+                // Отправляем запрос на увеличение счетчика прослушиваний
+                incrementTrackPlayCount(currentTrack.id);
+            }
+        };
+        
         const handleLoadedMetadata = () => setDuration(audio.duration);
         const handleEnded = () => {
             console.log("Трек завершен");
@@ -110,10 +127,13 @@ const Player = () => {
             audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
             audio.removeEventListener('ended', handleEnded);
         };
-    }, [nextTrack, volume]);
+    }, [nextTrack, volume, currentTrack]);
 
     useEffect(() => {
         if (!currentTrack) return;
+
+        // Сбрасываем флаг при смене трека
+        playCountRecordedRef.current = false;
 
         // Инициализируем аудио контекст при первом взаимодействии
         const setupAudio = async () => {
@@ -235,6 +255,16 @@ const Player = () => {
 
         if (filtersRef.current[band]) {
             filtersRef.current[band].gain.value = newValue;
+        }
+    };
+
+    // Функция для увеличения счетчика прослушиваний трека
+    const incrementTrackPlayCount = async (trackId) => {
+        try {
+            const response = await axios.post('http://localhost:4000/increment-track-plays', { trackId });
+            console.log('Прослушивание засчитано:', response.data);
+        } catch (error) {
+            console.error('Ошибка при обновлении счетчика прослушиваний:', error);
         }
     };
 

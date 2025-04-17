@@ -206,22 +206,119 @@ button{
   color: #007bff;
 }
 
+/* Стили для поисковой панели */
 .search {
-  flex-grow: 0.9;
+  position: relative;
+  flex: 1;
+  max-width: 500px;
+  margin: 0 20px;
 }
 
 .search-input {
-  padding: 10px;
-  border: none;
-  border-radius: 12px;
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  font-size: 14px;
   width: 100%;
+  padding: 10px 40px 10px 15px;
+  border-radius: 50px;
+  border: 1px solid #2e2e2e;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
 }
 
-.search-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+.search-input:focus {
+  border-color: #1db954;
+  box-shadow: 0 0 5px rgba(29, 185, 84, 0.3);
+}
+
+.search-button {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.search-button:hover .search-icon {
+  color: #1db954;
+}
+
+/* Стили для выпадающего списка результатов поиска */
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #282828;
+  border-radius: 5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 5px;
+  border: 1px solid #333;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.search-result-item:hover {
+  background-color: #333333;
+}
+
+.result-image {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-right: 12px;
+}
+
+.result-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.result-info {
+  flex: 1;
+}
+
+.result-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-artist {
+  font-size: 12px;
+  color: #b3b3b3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Карточка с градиентом */
@@ -321,9 +418,36 @@ button{
 }
 
 .chart-position {
-  font-size: 16px;
-  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
   margin-right: 15px;
+}
+
+.position-number {
+  font-weight: 700;
+  font-size: 16px;
+  color: #ccc;
+}
+
+.top-chart .position-number {
+  color: #1db954;
+}
+
+.top-chart li:nth-child(1) .position-number {
+  color: gold;
+  font-size: 18px;
+}
+
+.top-chart li:nth-child(2) .position-number {
+  color: silver;
+  font-size: 17px;
+}
+
+.top-chart li:nth-child(3) .position-number {
+  color: #cd7f32; /* бронзовый */
+  font-size: 16px;
 }
 
 .chart-title {
@@ -1244,4 +1368,72 @@ progress::-webkit-progress-value {
       opacity: 1;
       transform: translateY(0);
   }
+}
+
+.no-results {
+  padding: 20px;
+  text-align: center;
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+/* Стили для счетчика прослушиваний */
+.play-count {
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+  color: #999;
+  font-size: 13px;
+}
+
+.play-count-icon {
+  margin-right: 4px;
+  font-size: 16px;
+}
+
+/* Общие стили для топ-чарта */
+.top-chart {
+  background-color: rgba(29, 185, 84, 0.05);
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.top-chart .chart-header h2 {
+  color: #1db954;
+}
+
+/* Стили для жанров */
+.genres-section .genres-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-gap: 20px;
+}
+
+.genre-card {
+  background-color: #282828;
+  border-radius: 8px;
+  padding: 20px;
+  transition: background-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: white;
+}
+
+.genre-card:hover {
+  background-color: #333333;
+}
+
+.genre-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+  color: #1db954;
+}
+
+.genre-card .playlist-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
 }

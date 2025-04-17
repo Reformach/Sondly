@@ -4,7 +4,7 @@ import { UserContext } from '../../context/UserContext';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const ChartStroke = ({ coverImage, title, artist, duration, onClick, trackId, executorId }) => {
+const ChartStroke = ({ coverImage, title, artist, duration, onClick, trackId, executorId, playCount, position }) => {
     const { userData, isTrackLiked, loadFavorites } = useContext(UserContext);
     const [isLiked, setIsLiked] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -181,6 +181,12 @@ const ChartStroke = ({ coverImage, title, artist, duration, onClick, trackId, ex
                     >
                         <Icon icon="solar:playlist-add-linear" className="add-to-playlist-icon" />
                     </button>
+                    {playCount !== undefined && (
+                        <div className="play-count">
+                            <Icon icon="solar:headphones-round-linear" className="play-count-icon" />
+                            <span>{playCount}</span>
+                        </div>
+                    )}
                     <p>{duration}</p>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from 'react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
 import '../css files/uploadTracks.css';
@@ -6,7 +6,8 @@ import { Icon } from '@iconify/react';
 
 const UploadTrack = ({ onClose }) => {
   const [albumName, setAlbumName] = useState('');
-  const [genre, setGenre] = useState('');
+  const [genreId, setGenreId] = useState('');
+  const [genres, setGenres] = useState([]);
   const [coverImage, setCoverImage] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
   const [tracks, setTracks] = useState([{ name: '', file: null, preview: null }]);
@@ -15,6 +16,25 @@ const UploadTrack = ({ onClose }) => {
   const { userData } = useContext(UserContext);
   const fileInputRef = useRef(null);
   const audioInputRefs = useRef([]);
+
+  // Загружаем список жанров при монтировании компонента
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/get-genres');
+        setGenres(response.data);
+        // Если есть жанры, устанавливаем первый по умолчанию
+        if (response.data.length > 0) {
+          setGenreId(response.data[0].id);
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке жанров:', error);
+        setError('Не удалось загрузить список жанров');
+      }
+    };
+
+    fetchGenres();
+  }, []);
 
   // Обработчик для обложки альбома
   const handleCoverChange = (e) => {
@@ -98,6 +118,11 @@ const UploadTrack = ({ onClose }) => {
       return;
     }
 
+    if (!genreId) {
+      setError('Пожалуйста, выберите жанр');
+      return;
+    }
+
     if (tracks.some(track => !track.name || !track.file)) {
       setError('Пожалуйста, заполните все поля для треков');
       return;
@@ -108,7 +133,7 @@ const UploadTrack = ({ onClose }) => {
     const formData = new FormData();
     formData.append('executorId', userData.id);
     formData.append('albumName', albumName);
-    formData.append('genre', genre);
+    formData.append('genre_id', genreId);
     formData.append('coverImage', coverImage);
 
     tracks.forEach((track, index) => {
@@ -154,12 +179,18 @@ const UploadTrack = ({ onClose }) => {
 
             <div className="form-group">
               <label>Жанр альбома:</label>
-              <input
-                type="text"
-                value={genre}
-                onChange={(e) => setGenre(e.target.value)}
+              <select
+                value={genreId}
+                onChange={(e) => setGenreId(e.target.value)}
                 required
-              />
+              >
+                <option value="" disabled>Выберите жанр</option>
+                {genres.map(genre => (
+                  <option key={genre.id} value={genre.id}>
+                    {genre.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="form-group">
