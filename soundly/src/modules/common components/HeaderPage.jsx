@@ -3,7 +3,7 @@ import SearchPanel from "./SearchPanel";
 import { Icon } from "@iconify/react";
 import { UserContext } from '../context/UserContext';
 
-const HeaderPage = () => {
+const HeaderPage = (isAdmin = false) => {
     const { userData, logout } = useContext(UserContext);
     const [isPanelVisible, setIsPanelVisible] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -51,7 +51,9 @@ const HeaderPage = () => {
     return (
         <header className="header">
             <h1 className="app-name">Soundly</h1>
-            <SearchPanel />
+            {isAdmin &&(
+                <SearchPanel />
+            )}
             <div className="header-buttons-container">
                 <button className="button-about" onClick={openPanel}>
                     <Icon icon="solar:info-circle-linear" className="icon-navigation" />
@@ -61,7 +63,6 @@ const HeaderPage = () => {
                     <div className="user-menu-container">
                         <button className="user-button" onClick={toggleUserMenu}>
                             <Icon icon="solar:user-circle-linear" className="icon-navigation" />
-                            {userData.nickname && <span className="user-name">{userData.nickname}</span>}
                         </button>
                         
                         {isUserMenuOpen && (

@@ -4,7 +4,7 @@ import PlaylistStroke from "./PlaylistStroke";
 import AddPlaylistButton from './AddPlaylistButton';
 import { UserContext } from '../../context/UserContext';
 
-const Playlists = ({title = "Плейлисты", titleBtn = "Смотреть все", hrefBtn = "/playlists"}) => {
+const Playlists = ({title = "Плейлисты", titleBtn = "Смотреть все", hrefBtn = "/playlists", isMain = ""}) => {
     const [playlists, setPlaylists] = useState([]);
     const [loading, setLoading] = useState(true);
     const { userData } = useContext(UserContext);
@@ -34,7 +34,7 @@ const Playlists = ({title = "Плейлисты", titleBtn = "Смотреть �
     }, [userData.id]);
     
     return(
-        <section className="playlists">
+        <section className={`playlists ${isMain}`}>
             <div className="chart-header">
                 <h2>{title}</h2> 
                 <a href={hrefBtn} className="more-see-text">{titleBtn}</a>

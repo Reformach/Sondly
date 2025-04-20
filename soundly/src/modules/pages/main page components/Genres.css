@@ -1,0 +1,115 @@
+/* Стили для контейнера списка жанров */
+.genres-list-container {
+    width: 100%;
+    padding-bottom: 20px;
+    /* Ограничиваем высоту, чтобы появился скролл */
+    max-height: calc(100vh - 220px); /* Высчитываем с учетом шапки и элементов навигации */
+    overflow: hidden; /* Скрываем переполнение */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Стили для списка жанров в виде сетки */
+.playlist-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    list-style: none;
+    justify-content: flex-start;
+    /* Добавляем скролл только по вертикали */
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Полезная высота минус высота заголовка и отступы */
+    max-height: calc(100vh - 270px);
+    /* Отступ для скролла */
+    padding-right: 10px;
+    /* Сглаживание прокрутки */
+    scroll-behavior: smooth;
+    height: 55%;
+}
+
+/* Стилизация скроллбара */
+.playlist-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.playlist-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.playlist-list::-webkit-scrollbar-thumb {
+    background-color: rgba(128, 128, 128, 0.5);
+    border-radius: 3px;
+}
+
+/* Стили для элемента списка (карточки жанра) */
+.playlist-item {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: calc(25% - 20px);
+    min-width: 30%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: flex-start;
+    padding: 15px;
+    background-color: rgba(240, 240, 240, 0.1);
+    border-radius: 10px;
+    height: 100%;
+    transition: background-color 0.2s, transform 0.2s;
+    height: 120px;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Стили для ссылки */
+.playlist-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
+}
+
+.playlist-link :hover .playlist-item{
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-3px);
+}
+
+/* Стили для иконки жанра */
+.genre-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(128, 128, 128, 0.2);
+    border-radius: 50%;
+    margin-right: 15px;
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #679BE8;
+}
+
+/* Стили для информации о жанре */
+.playlist-info {
+    flex: 1;
+}
+
+.playlist-name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.playlist-description {
+    margin: 5px 0 0;
+    font-size: 13px;
+    color: #999;
+}
+
+/* Стили для пустого сообщения */
+.empty-message {
+    margin-top: 20px;
+    text-align: center;
+    color: #999;
+}

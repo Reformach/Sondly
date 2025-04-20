@@ -2,13 +2,13 @@ import React from 'react';
 
 const PanelHeaderExecutor = ({ description, executor }) => {
     return (
-        <div className="section-decoration no-main">
+        <div className="section-decoration">
             <div className="about-section executor-header">
                 {executor ? (
                     <>
                         <div className="executor-avatar">
                             <img 
-                                src={executor.avatar_url || "/default-avatar.jpg"} 
+                                src={executor.avatar_url || "http://localhost:4000/users-avatars/default-avatar.png"} 
                                 alt={executor.nickname || 'Исполнитель'} 
                                 className="executor-avatar-img"
                             />
@@ -20,12 +20,12 @@ const PanelHeaderExecutor = ({ description, executor }) => {
                     </>
                 ) : (
                     <>
-                        <img src="images/Music decoration.png" alt="music-decoration"/>
-                        <p>{description}</p>
+            <img src="images/Music decoration.png" alt="music-decoration"/>
+            <p>{description}</p>
                     </>
                 )}
-            </div>
         </div>
+    </div>
     );
 };
 

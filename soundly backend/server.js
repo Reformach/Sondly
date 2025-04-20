@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, query, where, getDocs, doc, updateDoc, getDoc, addDoc, Timestamp, arrayUnion, arrayRemove, serverTimestamp } = require('firebase/firestore');
+const { getFirestore, collection, query, where, getDocs, doc, updateDoc, getDoc, addDoc, Timestamp, arrayUnion, arrayRemove, serverTimestamp, deleteDoc } = require('firebase/firestore');
 const upload = require('./multerConfig');
 const path = require('path');
 const fs = require('fs');
@@ -65,7 +65,7 @@ app.post('/register', async (req, res) => {
         nickname,
         password, 
         registration_date: Timestamp.now(),
-        avatar: 'users avatars/default-avatar.png',
+        avatar: 'users-avatars/default-avatar.png',
         country
     }
     else
@@ -74,7 +74,7 @@ app.post('/register', async (req, res) => {
         nickname,
         password, 
         registration_date: Timestamp.now(),
-        avatar: 'users avatars/default-avatar.png'
+        avatar: 'users-avatars/default-avatar.png'
       };
 
     const docRef = await addDoc(usersCollection, newUser);
@@ -160,7 +160,7 @@ app.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
 
 // Загрузка трека и альбома
 app.post('/upload-tracks', upload.fields([{ name: 'coverImage', maxCount: 1 }, { name: 'tracks', maxCount: 10 }]), async (req, res) => {
-  const { executorId, albumName, genre, trackNames } = req.body;
+  const { executorId, albumName, genre_id, trackNames } = req.body;
 
   // Пути к файлам
   const coverImagePath = `album-covers/${req.files['coverImage'][0].filename}`;
@@ -171,7 +171,7 @@ app.post('/upload-tracks', upload.fields([{ name: 'coverImage', maxCount: 1 }, {
     const albumData = {
       executor_id: executorId,
       name: albumName,
-      genre,
+      genre_id,
       release_date: new Date().toISOString(),
       image_src: coverImagePath,
     };
@@ -866,6 +866,493 @@ app.get('/get-top-tracks', async (req, res) => {
     console.error('Ошибка при получении топ-треков:', error);
     res.status(500).json({
       message: 'Ошибка при получении топ-треков',
+      error: error.message
+    });
+  }
+});
+
+app.get('/get-all-users', async (req, res) => {
+  try {
+    const usersSnapshot = await getDocs(collection(db, 'users'));
+    const users = usersSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    const executorsSnapshot = await getDocs(collection(db, 'executors'));
+    const executors = executorsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      isExecutor: true
+    }));
+    
+    const allUsers = [...users, ...executors];
+    res.status(200).json(allUsers);
+  } catch (error) {
+    console.error('Ошибка при получении пользователей:', error);
+    res.status(500).json({ 
+      message: 'Ошибка при получении пользователей',
+      error: error.message 
+    });
+  }
+});
+
+app.get('/get-all-tracks', async (req, res) => {
+  try {
+    const tracksSnapshot = await getDocs(collection(db, 'tracks'));
+    const tracksPromises = tracksSnapshot.docs.map(async (trackDoc) => {
+      const trackData = trackDoc.data();
+
+      let albumData = null;
+      let executorData = null;
+      
+      if (trackData.album_id) {
+        const albumDoc = await getDoc(doc(db, 'albums', trackData.album_id));
+        if (albumDoc.exists()) {
+          albumData = { id: albumDoc.id, ...albumDoc.data() };
+          
+          if (albumData.executor_id) {
+            let executorDoc = await getDoc(doc(db, 'users', albumData.executor_id));
+            
+            if (!executorDoc.exists()) {
+              executorDoc = await getDoc(doc(db, 'executors', albumData.executor_id));
+            }
+            
+            if (executorDoc.exists()) {
+              executorData = executorDoc.data();
+              albumData.executor_name = executorData.nickname;
+            }
+          }
+        }
+      }
+      
+      return {
+        id: trackDoc.id,
+        ...trackData,
+        album: albumData
+      };
+    });
+    
+    const tracks = await Promise.all(tracksPromises);
+    res.status(200).json(tracks);
+  } catch (error) {
+    console.error('Ошибка при получении треков:', error);
+    res.status(500).json({ 
+      message: 'Ошибка при получении треков',
+      error: error.message 
+    });
+  }
+});
+
+app.get('/get-all-albums', async (req, res) => {
+  try {
+    const albumsSnapshot = await getDocs(collection(db, 'albums'));
+    const albumsPromises = albumsSnapshot.docs.map(async (albumDoc) => {
+      const albumData = albumDoc.data();
+      
+      let executorData = null;
+      if (albumData.executor_id) {
+        let executorDoc = await getDoc(doc(db, 'users', albumData.executor_id));
+        
+        if (!executorDoc.exists()) {
+          executorDoc = await getDoc(doc(db, 'executors', albumData.executor_id));
+        }
+        
+        if (executorDoc.exists()) {
+          executorData = executorDoc.data();
+        }
+      }
+      
+      const tracksQuery = query(collection(db, 'tracks'), where('album_id', '==', albumDoc.id));
+      const tracksSnapshot = await getDocs(tracksQuery);
+      
+      return {
+        id: albumDoc.id,
+        ...albumData,
+        executor_name: executorData ? executorData.nickname : 'Неизвестный исполнитель',
+        tracks_count: tracksSnapshot.docs.length
+      };
+    });
+    
+    const albums = await Promise.all(albumsPromises);
+    res.status(200).json(albums);
+  } catch (error) {
+    console.error('Ошибка при получении альбомов:', error);
+    res.status(500).json({ 
+      message: 'Ошибка при получении альбомов',
+      error: error.message 
+    });
+  }
+});
+
+app.delete('/delete-user/:userId', async (req, res) => {
+  const { userId } = req.params;
+  
+  try {
+
+    const userRef = doc(db, 'users', userId);
+    const userDoc = await getDoc(userRef);
+    
+    if (userDoc.exists()) {
+
+      const userData = userDoc.data();
+      if (userData.isAdmin) {
+        return res.status(403).json({ message: 'Удаление администраторов запрещено' });
+      }
+      
+      await deleteDoc(userRef);
+
+      const playlistsQuery = query(collection(db, 'playlists'), where('userId', '==', userId));
+      const playlistsSnapshot = await getDocs(playlistsQuery);
+      
+      const deletePromises = playlistsSnapshot.docs.map(playlistDoc => 
+        deleteDoc(doc(db, 'playlists', playlistDoc.id))
+      );
+      
+      await Promise.all(deletePromises);
+      
+      return res.status(200).json({ message: 'Пользователь успешно удален' });
+    }
+    
+    const executorRef = doc(db, 'executors', userId);
+    const executorDoc = await getDoc(executorRef);
+    
+    if (executorDoc.exists()) {
+      await deleteDoc(executorRef);
+      
+      const albumsQuery = query(collection(db, 'albums'), where('executor_id', '==', userId));
+      const albumsSnapshot = await getDocs(albumsQuery);
+      
+      for (const albumDoc of albumsSnapshot.docs) {
+        const tracksQuery = query(collection(db, 'tracks'), where('album_id', '==', albumDoc.id));
+        const tracksSnapshot = await getDocs(tracksQuery);
+
+        for (const trackDoc of tracksSnapshot.docs) {
+          await deleteDoc(doc(db, 'tracks', trackDoc.id));
+        }
+        
+        await deleteDoc(doc(db, 'albums', albumDoc.id));
+      }
+      
+      return res.status(200).json({ message: 'Исполнитель успешно удален' });
+    }
+    
+    return res.status(404).json({ message: 'Пользователь не найден' });
+  } catch (error) {
+    console.error('Ошибка при удалении пользователя:', error);
+    res.status(500).json({ 
+      message: 'Ошибка при удалении пользователя',
+      error: error.message 
+    });
+  }
+});
+
+app.delete('/delete-track/:trackId', async (req, res) => {
+  const { trackId } = req.params;
+  
+  try {
+    const trackRef = doc(db, 'tracks', trackId);
+    const trackDoc = await getDoc(trackRef);
+    
+    if (!trackDoc.exists()) {
+      return res.status(404).json({ message: 'Трек не найден' });
+    }
+
+    const trackData = trackDoc.data();
+    if (trackData.file_path) {
+      const trackFilePath = path.join(__dirname, '../soundly/public', trackData.file_path);
+      fs.unlink(trackFilePath, (err) => {
+        if (err) console.error('Ошибка при удалении файла трека:', err);
+      });
+    }
+    
+    const playlistsSnapshot = await getDocs(collection(db, 'playlists'));
+    
+    for (const playlistDoc of playlistsSnapshot.docs) {
+      const playlistData = playlistDoc.data();
+      if (playlistData.tracks && playlistData.tracks.includes(trackId)) {
+        await updateDoc(doc(db, 'playlists', playlistDoc.id), {
+          tracks: arrayRemove(trackId)
+        });
+      }
+    }
+    
+    await deleteDoc(trackRef);
+    
+    res.status(200).json({ message: 'Трек успешно удален' });
+  } catch (error) {
+    console.error('Ошибка при удалении трека:', error);
+    res.status(500).json({ 
+      message: 'Ошибка при удалении трека',
+      error: error.message 
+    });
+  }
+});
+
+app.delete('/delete-album/:albumId', async (req, res) => {
+  const { albumId } = req.params;
+  
+  try {
+    const albumRef = doc(db, 'albums', albumId);
+    const albumDoc = await getDoc(albumRef);
+    
+    if (!albumDoc.exists()) {
+      return res.status(404).json({ message: 'Альбом не найден' });
+    }
+    
+    const albumData = albumDoc.data();
+    if (albumData.image_src) {
+      const coverImagePath = path.join(__dirname, '../soundly/public', albumData.image_src);
+      fs.unlink(coverImagePath, (err) => {
+        if (err) console.error('Ошибка при удалении обложки альбома:', err);
+      });
+    }
+    
+    const tracksQuery = query(collection(db, 'tracks'), where('album_id', '==', albumId));
+    const tracksSnapshot = await getDocs(tracksQuery);
+    
+    for (const trackDoc of tracksSnapshot.docs) {
+      const trackData = trackDoc.data();
+      
+      if (trackData.file_path) {
+        const trackFilePath = path.join(__dirname, '../soundly/public', trackData.file_path);
+        fs.unlink(trackFilePath, (err) => {
+          if (err) console.error('Ошибка при удалении файла трека:', err);
+        });
+      }
+      
+      const playlistsSnapshot = await getDocs(collection(db, 'playlists'));
+      
+      for (const playlistDoc of playlistsSnapshot.docs) {
+        const playlistData = playlistDoc.data();
+        if (playlistData.tracks && playlistData.tracks.includes(trackDoc.id)) {
+          await updateDoc(doc(db, 'playlists', playlistDoc.id), {
+            tracks: arrayRemove(trackDoc.id)
+          });
+        }
+      }
+      
+      await deleteDoc(doc(db, 'tracks', trackDoc.id));
+    }
+    
+    await deleteDoc(albumRef);
+    
+    res.status(200).json({ message: 'Альбом и все его треки успешно удалены' });
+  } catch (error) {
+    console.error('Ошибка при удалении альбома:', error);
+    res.status(500).json({ 
+      message: 'Ошибка при удалении альбома',
+      error: error.message 
+    });
+  }
+});
+
+// Получение списка жанров
+app.get('/get-genres', async (req, res) => {
+  try {
+    // Проверяем, существует ли коллекция genres
+    const genresSnapshot = await getDocs(collection(db, 'genres'));
+    
+    // Если коллекция пуста, возвращаем базовый набор жанров
+    if (genresSnapshot.empty) {
+      // Создаем базовые жанры в базе данных
+      const defaultGenres = [
+        { name: 'Рок', description: 'Рок музыка' },
+        { name: 'Поп', description: 'Поп музыка' },
+        { name: 'Рэп', description: 'Рэп и хип-хоп' },
+        { name: 'Электронная', description: 'Электронная музыка' },
+        { name: 'Джаз', description: 'Джаз' },
+        { name: 'Классическая', description: 'Классическая музыка' },
+        { name: 'Кантри', description: 'Кантри музыка' },
+        { name: 'R&B', description: 'Ритм-энд-блюз' }
+      ];
+      
+      // Сохраняем жанры в базу данных и собираем результаты
+      const genresWithIds = await Promise.all(
+        defaultGenres.map(async (genre) => {
+          const docRef = await addDoc(collection(db, 'genres'), genre);
+          return { id: docRef.id, ...genre };
+        })
+      );
+      
+      return res.status(200).json(genresWithIds);
+    }
+    
+    // Если коллекция не пуста, возвращаем имеющиеся жанры
+    const genres = genresSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    res.status(200).json(genres);
+  } catch (error) {
+    console.error('Ошибка при получении жанров:', error);
+    res.status(500).json({ 
+      message: 'Ошибка при получении жанров',
+      error: error.message 
+    });
+  }
+});
+
+// Получение треков по жанру
+app.get('/get-tracks-by-genre/:genreId', async (req, res) => {
+  const { genreId } = req.params;
+  
+  if (!genreId) {
+    return res.status(400).json({ message: 'Требуется ID жанра' });
+  }
+  
+  try {
+    // Получаем информацию о жанре
+    const genreDoc = await getDoc(doc(db, 'genres', genreId));
+    
+    if (!genreDoc.exists()) {
+      return res.status(404).json({ message: 'Жанр не найден' });
+    }
+    
+    const genre = {
+      id: genreDoc.id,
+      ...genreDoc.data()
+    };
+    
+    // Получаем альбомы с указанным жанром
+    const albumsQuery = query(
+      collection(db, 'albums'),
+      where('genre_id', '==', genreId)
+    );
+    
+    const albumsSnapshot = await getDocs(albumsQuery);
+    const tracks = [];
+    
+    // Для каждого альбома получаем треки
+    for (const albumDoc of albumsSnapshot.docs) {
+      const albumData = albumDoc.data();
+      
+      // Получаем треки этого альбома
+      const tracksQuery = query(
+        collection(db, 'tracks'),
+        where('album_id', '==', albumDoc.id)
+      );
+      
+      const tracksSnapshot = await getDocs(tracksQuery);
+      
+      // Получаем данные исполнителя
+      let executorData = null;
+      if (albumData.executor_id) {
+        // Сначала ищем в коллекции users
+        let executorDoc = await getDoc(doc(db, 'users', albumData.executor_id));
+        
+        // Если не нашли, ищем в коллекции executors
+        if (!executorDoc.exists()) {
+          executorDoc = await getDoc(doc(db, 'executors', albumData.executor_id));
+        }
+        
+        if (executorDoc.exists()) {
+          executorData = executorDoc.data();
+        }
+      }
+      
+      // Добавляем треки в результат
+      tracksSnapshot.forEach(trackDoc => {
+        tracks.push({
+          id: trackDoc.id,
+          ...trackDoc.data(),
+          album: {
+            id: albumDoc.id,
+            name: albumData.name,
+            image_src: albumData.image_src,
+            executor: executorData ? executorData.nickname : 'Неизвестный исполнитель',
+            executor_name: executorData ? executorData.nickname : 'Неизвестный исполнитель',
+            executor_id: albumData.executor_id
+          }
+        });
+      });
+    }
+    
+    res.status(200).json({
+      genre,
+      tracks
+    });
+  } catch (error) {
+    console.error('Ошибка при получении треков по жанру:', error);
+    res.status(500).json({
+      message: 'Ошибка при получении треков по жанру',
+      error: error.message
+    });
+  }
+});
+
+// Получение треков альбома по ID альбома
+app.get('/get-album-tracks/:albumId', async (req, res) => {
+  const { albumId } = req.params;
+  
+  if (!albumId) {
+    return res.status(400).json({ message: 'Требуется ID альбома' });
+  }
+  
+  try {
+    // Получаем информацию об альбоме
+    const albumDoc = await getDoc(doc(db, 'albums', albumId));
+    
+    if (!albumDoc.exists()) {
+      return res.status(404).json({ message: 'Альбом не найден' });
+    }
+    
+    const albumData = {
+      id: albumId,
+      ...albumDoc.data()
+    };
+    
+    // Получаем данные исполнителя
+    let executorData = null;
+    if (albumData.executor_id) {
+      // Сначала ищем в коллекции users
+      let executorDoc = await getDoc(doc(db, 'users', albumData.executor_id));
+      
+      // Если не нашли, ищем в коллекции executors
+      if (!executorDoc.exists()) {
+        executorDoc = await getDoc(doc(db, 'executors', albumData.executor_id));
+      }
+      
+      if (executorDoc.exists()) {
+        executorData = executorDoc.data();
+        albumData.executor_name = executorData.nickname;
+      }
+    }
+    
+    // Получаем треки альбома
+    const tracksQuery = query(
+      collection(db, 'tracks'),
+      where('album_id', '==', albumId)
+    );
+    
+    const tracksSnapshot = await getDocs(tracksQuery);
+    const tracks = [];
+    
+    // Обрабатываем треки
+    tracksSnapshot.forEach(trackDoc => {
+      tracks.push({
+        id: trackDoc.id,
+        ...trackDoc.data(),
+        album: {
+          id: albumId,
+          name: albumData.name,
+          image_src: albumData.image_src,
+          executor: executorData ? executorData.nickname : 'Неизвестный исполнитель',
+          executor_name: executorData ? executorData.nickname : 'Неизвестный исполнитель',
+          executor_id: albumData.executor_id
+        }
+      });
+    });
+    
+    res.status(200).json({
+      album: albumData,
+      tracks
+    });
+  } catch (error) {
+    console.error('Ошибка при получении треков альбома:', error);
+    res.status(500).json({
+      message: 'Ошибка при получении треков альбома',
       error: error.message
     });
   }

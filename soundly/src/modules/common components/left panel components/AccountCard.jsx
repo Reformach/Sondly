@@ -57,7 +57,7 @@ const AccountCard = () => {
   return (
     <div className="profile panels">
       <img
-        src={userData.avatar}
+        src={`http://localhost:4000/${userData.avatar}`}
         alt="Профиль"
         className="profile-icon"
         onClick={handleAvatarClick}

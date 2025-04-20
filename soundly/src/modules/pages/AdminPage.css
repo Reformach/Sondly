@@ -1,0 +1,114 @@
+.admin-page {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #FFFFFF;
+}
+
+.admin-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #2c2c2c;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+  color: #679BE8;
+}
+
+.tab-btn.active {
+  color: #679BE8;
+  border-bottom: 2px solid #679BE8;
+}
+
+.admin-tab {
+  margin-top: 20px;
+}
+
+.admin-tab h2 {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background-color: #121212;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.admin-table th, .admin-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #2c2c2c;
+}
+
+.admin-table th {
+  background-color: #1d1d1d;
+  color: #679BE8;
+  font-weight: normal;
+}
+
+.admin-table tr:hover {
+  background-color: #1a1a1a;
+}
+
+.user-avatar, .track-cover, .album-cover {
+  width: 50px;
+  height: 50px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.delete-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.delete-btn:hover {
+  background-color: #c0392b;
+}
+
+.delete-btn:disabled {
+  background-color: #7f8c8d;
+  cursor: not-allowed;
+}
+
+.loading-message, .error-message {
+  padding: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.error-message {
+  color: #e74c3c;
+}
+
+.admin-content {
+  min-height: 400px;
+  background-color: #1d1d1d;
+  border-radius: 5px;
+  padding: 20px;
+} 

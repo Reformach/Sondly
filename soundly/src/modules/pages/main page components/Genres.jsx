@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify/react';
+import './Genres.css';
 
 const Genres = ({ title = "Жанры", titleBtn = "Все жанры", hrefBtn = "/genres" }) => {
     const [genres, setGenres] = useState([]);
@@ -43,32 +44,34 @@ const Genres = ({ title = "Жанры", titleBtn = "Все жанры", hrefBtn 
     }
 
     return (
-        <section className="playlists-section genres-section">
-            <div className="playlist-header">
+        <section className="playlists genres-list-container">
+            <div className="chart-header">
                 <h2>{title}</h2>
                 <Link to={hrefBtn} className="more-see-text">{titleBtn}</Link>
             </div>
+            <div className="line-header-chart"></div>
             
-            <div className="playlists-container genres-container">
-                {genres.length > 0 ? (
-                    genres.map(genre => (
-                        <Link 
-                            to={`/genre/${genre.id}`} 
-                            key={genre.id} 
-                            className="playlist-card genre-card"
-                        >
+            {genres.length > 0 ? (
+                <ul className="playlist-list">
+                    {genres.map(genre => (
+                        <li key={genre.id} className="playlist-item">
+                            <Link to={`/genre/${genre.id}`} className="playlist-link">
                             <div className="genre-icon">
                                 <Icon icon={getGenreIcon(genre.name)} />
                             </div>
                             <div className="playlist-info">
                                 <h3 className="playlist-name">{genre.name}</h3>
+                                {genre.description && (
+                                    <p className="playlist-description">{genre.description}</p>
+                                )}
                             </div>
-                        </Link>
-                    ))
-                ) : (
-                    <div className="empty-message">Жанры не найдены</div>
-                )}
-            </div>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <div className="empty-message">Жанры не найдены</div>
+            )}
         </section>
     );
 };

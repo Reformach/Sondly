@@ -9,8 +9,14 @@ export const UserProvider = ({ children }) => {
     const savedData = localStorage.getItem('userData');
     return savedData 
       ? JSON.parse(savedData)
-      : { id: null, favoritesPlaylist: null };
+      : { id: null, favoritesPlaylist: null, isAdmin: false };
   });
+
+  // Добавляем состояние для отслеживания времени последней загрузки избранного
+  const [lastFavoritesLoad, setLastFavoritesLoad] = useState(null);
+  
+  // Добавляем состояние для отслеживания, идет ли загрузка в данный момент
+  const [isLoadingFavorites, setIsLoadingFavorites] = useState(false);
 
   useEffect(() => {
     // Сохраняем данные пользователя в localStorage при изменении
@@ -18,23 +24,53 @@ export const UserProvider = ({ children }) => {
       localStorage.setItem('userData', JSON.stringify(userData));
     }
     
-    // Если у пользователя есть ID, загружаем его избранное
-    if (userData && userData.id) {
+    // Если у пользователя есть ID, загружаем его избранное только при первом рендере или смене пользователя
+    if (userData && userData.id && shouldReloadFavorites()) {
       loadFavorites(userData.id);
     }
   }, [userData?.id]); // Зависимость только от ID
 
+  // Функция для проверки необходимости перезагрузки избранного
+  const shouldReloadFavorites = () => {
+    // Если идет загрузка, не нужно запускать еще одну
+    if (isLoadingFavorites) {
+      return false;
+    }
+    
+    // Если данные никогда не загружались, нужно загрузить
+    if (!lastFavoritesLoad) {
+      return true;
+    }
+    
+    // Если данные загружались более 5 минут назад, обновляем
+    const CACHE_TIME = 5 * 60 * 1000; // 5 минут в миллисекундах
+    return Date.now() - lastFavoritesLoad > CACHE_TIME;
+  };
+
   // Добавляем функцию выхода
   const logout = () => {
     localStorage.removeItem('userData');
-    setUserData({ id: null, favoritesPlaylist: null });
+    setUserData({ id: null, favoritesPlaylist: null, isAdmin: false });
+    setLastFavoritesLoad(null);
   };
 
   const loadFavorites = async (userId) => {
+    // Если загрузка уже идет или кеш еще свежий, не запускаем повторную загрузку
+    if (isLoadingFavorites || !shouldReloadFavorites()) {
+      console.log("Пропускаю загрузку избранного - данные уже загружаются или недавно загружены");
+      return;
+    }
+    
+    setIsLoadingFavorites(true);
+    
     try {
+      console.log("Загружаю избранное с сервера для userId:", userId);
       const response = await axios.get('http://localhost:4000/get-favorites', {
         params: { userId }
       });
+      
+      // Обновляем время последней загрузки
+      setLastFavoritesLoad(Date.now());
       
       // Функция для форматирования пути к обложке
       const formatImagePath = (imagePath) => {
@@ -76,11 +112,7 @@ export const UserProvider = ({ children }) => {
         return track;
       });
       
-      console.log("Обработанные треки избранного:", processedTracks);
-      if (processedTracks.length > 0) {
-        console.log("Пример обработанного трека:", processedTracks[0]);
-        console.log("Обложка трека:", processedTracks[0].album.image_src);
-      }
+      console.log("Обработанные треки избранного:", processedTracks.length);
       
       // Всегда сохраняем объект с tracks, даже если их нет
       setUserData(prev => ({
@@ -100,6 +132,16 @@ export const UserProvider = ({ children }) => {
           tracks: []
         }
       }));
+    } finally {
+      setIsLoadingFavorites(false);
+    }
+  };
+
+  // Принудительное обновление избранного (например, после добавления треков)
+  const forceFavoritesReload = () => {
+    if (userData?.id) {
+      setLastFavoritesLoad(null); // Сбрасываем время последней загрузки
+      loadFavorites(userData.id);
     }
   };
 
@@ -108,14 +150,21 @@ export const UserProvider = ({ children }) => {
     return userData.favoritesPlaylist.tracks.some(track => track.id === trackId);
   };
 
+  // Проверка, является ли пользователь администратором
+  const isAdmin = () => {
+    return userData?.isAdmin === true;
+  };
+
   return (
     <UserContext.Provider 
       value={{ 
         userData, 
         setUserData,
         loadFavorites,
+        forceFavoritesReload,
         isTrackLiked,
-        logout
+        logout,
+        isAdmin
       }}
     >
       {children}

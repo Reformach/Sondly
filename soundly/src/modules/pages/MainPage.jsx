@@ -56,7 +56,7 @@ const MainPage = () => {
                                     limit={5}
                                     isTopChart={true}
                                 />
-                                <Playlist />
+                                <Playlist isMain="playlist-main"/>
                             </section>
                             <Player />
                         </>

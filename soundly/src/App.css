@@ -9,6 +9,8 @@
   background-size: 400% 400%;
   animation: gradient 10s ease infinite;
   color: #fff;
+  overflow-y: hidden;
+  height: 100vh;
 }
 
 p{
@@ -99,6 +101,7 @@ button{
   flex-direction: row;
   justify-content: space-between;
   gap: 3em;
+  height: 45%;
 }
 
 .navigation-header{
@@ -210,12 +213,11 @@ button{
 .search {
   position: relative;
   flex: 1;
-  max-width: 500px;
   margin: 0 20px;
 }
 
 .search-input {
-  width: 100%;
+  width: 95%;
   padding: 10px 40px 10px 15px;
   border-radius: 50px;
   border: 1px solid #2e2e2e;
@@ -227,8 +229,8 @@ button{
 }
 
 .search-input:focus {
-  border-color: #1db954;
-  box-shadow: 0 0 5px rgba(29, 185, 84, 0.3);
+  border-color: #679BE8;
+  box-shadow: 0 0 5px #679BE8;
 }
 
 .search-button {
@@ -375,6 +377,10 @@ button{
   color: white;
   width: 25px;
   height: 25px;
+  transition: all 0.2s;
+}
+.play-button-icon-chart:hover{
+  color: #937CD4;
 }
 
 .like-and-time{
@@ -498,9 +504,8 @@ button{
   display: flex;
   align-items: center;
   padding: 20px;
-  margin-bottom: 30px;
   border-radius: 12px;
-  background-color: rgba(137, 103, 237, 0.1);
+  flex-direction: row;
 }
 
 .executor-avatar {
@@ -589,10 +594,6 @@ button{
   color: var(--light-text);
 }
 
-.executor-albums {
-  margin-top: 40px;
-}
-
 .no-albums-message {
   color: var(--light-text);
   opacity: 0.7;
@@ -615,6 +616,7 @@ button{
 /* Плейлисты */
 .playlists {
   margin-bottom: 30px;
+  width: 100%;
 }
 
 .playlists h2 {
@@ -628,17 +630,9 @@ button{
   padding: 0;
 }
 
-.playlist-item {
-  background: url(https://img5.goodfon.ru/wallpaper/nbig/1/5e/morten-solgaard-pedersen-by-morten-solgaard-pedersen-cat-art.jpg);
-  background-size: cover;
-  border-radius: 12px; /* Закругленные углы */
-  width: 200px; /* Ширина карточки */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Тень */
-  transition: transform 0.2s ease, box-shadow 0.2s ease; /* Анимация при наведении */
-  height: 200px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+.playlist-main{
+  margin-bottom: 30px;
+  max-width: 600px;
 }
 
 .playlist-header{
@@ -657,35 +651,6 @@ button{
   color: #679BE8;
 }
 
-.playlist-name {
-  font-size: 18px; /* Размер шрифта заголовка */
-  font-weight: bold; /* Жирный шрифт */
-  color: #fff; /* Белый цвет текста */
-  margin-bottom: 8px; /* Отступ снизу */
-}
-
-.playlist-description {
-  font-size: 14px; /* Размер шрифта описания */
-  color: rgba(255, 255, 255, 0.7); /* Полупрозрачный белый цвет */
-  margin: 0; /* Убираем отступы */
-}
-
-.playlist-item:hover {
-  transform: translateY(-4px); /* Поднимаем карточку при наведении */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Увеличиваем тень */
-}
-
-.playlist-duration {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.playlist-content{
-  background-color: rgba(137, 103, 237, 0.41);
-  backdrop-filter: blur(5px);
-  border-radius: 0 0 12px 12px;
-  padding: 10px;
-}
 
 .show-more {
   padding: 10px;
@@ -871,14 +836,6 @@ progress::-webkit-progress-value {
   align-items: flex-start;
 }
 
-.close-button {
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  margin-bottom: 10px;
-}
-
 @keyframes fadeIn {
   from {
       opacity: 0;
@@ -1000,9 +957,7 @@ progress::-webkit-progress-value {
 }
 
 .user-button {
-  display: flex;
   align-items: center;
-  gap: 5px;
   padding: 5px 10px;
   background: none;
   border: none;
@@ -1100,7 +1055,7 @@ progress::-webkit-progress-value {
 }
 
 .modal-create-playlist {
-  background-color: var(--panel-bg);
+  background-color: rgba(50, 50, 50, 0.7);
   border-radius: 12px;
   padding: 25px;
   width: 90%;
@@ -1117,6 +1072,7 @@ progress::-webkit-progress-value {
 
 .form-field {
   margin-bottom: 15px;
+  width: 100%;
 }
 
 .form-field label {
@@ -1128,7 +1084,7 @@ progress::-webkit-progress-value {
 
 .form-field input,
 .form-field textarea {
-  width: 100%;
+  width: 95%;
   padding: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
@@ -1187,6 +1143,7 @@ progress::-webkit-progress-value {
   color: var(--text-color);
   opacity: 0.7;
   transition: all 0.2s;
+  
 }
 
 .add-to-playlist-button:hover {
@@ -1195,7 +1152,8 @@ progress::-webkit-progress-value {
 }
 
 .add-to-playlist-icon {
-  font-size: 18px;
+  height: 23px;
+  width: 23px;
 }
 
 /* Модальное окно выбора плейлиста */
@@ -1213,7 +1171,7 @@ progress::-webkit-progress-value {
 }
 
 .playlist-select-modal {
-  background-color: var(--panel-bg);
+  background-color: rgba(50, 50, 50, 0.7);
   width: 90%;
   max-width: 450px;
   border-radius: 12px;
@@ -1425,15 +1383,26 @@ progress::-webkit-progress-value {
   background-color: #333333;
 }
 
-.genre-icon {
-  font-size: 48px;
-  margin-bottom: 15px;
-  color: #1db954;
-}
-
 .genre-card .playlist-name {
   font-size: 16px;
   font-weight: 600;
   margin: 0;
   text-align: center;
+}
+
+.close-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 5px;
+  border-radius: 50%;
+}
+.close-button:hover {
+  color: #fff;
 }

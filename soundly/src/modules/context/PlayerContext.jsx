@@ -23,8 +23,8 @@ export const PlayerProvider = ({ children }) => {
         } else {
             // Если новый трек, устанавливаем его и начинаем воспроизведение
             lastTrackIdRef.current = track.id;
-            setCurrentTrack(track);
-            setIsPlaying(true); // Автоматически начинаем воспроизведение
+        setCurrentTrack(track);
+        setIsPlaying(true); // Автоматически начинаем воспроизведение
         }
     };
 

@@ -101,15 +101,7 @@ const Chart = ({ title, titleBtn, hrefBtn, isFavorites, playlistId, playlist, cu
                     });
                     console.log("Треки из плейлиста (обработанные):", allTracks);
                     setTracks(allTracks);
-                } else {
-                    const response = await axios.get('http://localhost:4000/get-albums-and-tracks');
-                    setAlbums(response.data);
-                    const allTracks = response.data.flatMap(album => 
-                        album.tracks.map(track => normalizeTrack({ ...track, album }))
-                    );
-                    console.log("Треки из всех альбомов:", allTracks);
-                    setTracks(allTracks);
-                }
+                } 
             } catch (error) {
                 console.error('Ошибка при загрузке данных:', error);
             } finally {

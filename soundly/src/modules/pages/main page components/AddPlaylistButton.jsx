@@ -62,11 +62,9 @@ const AddPlaylistButton = ({ onPlaylistAdded }) => {
     
     return (
         <>
-            <li className="playlist-item add-playlist" onClick={openModal}>
-                <div className="playlist-content add-playlist-content">
-                    <Icon icon="solar:add-circle-linear" className="add-playlist-icon" />
-                    <h3 className="playlist-name">Создать плейлист</h3>
-                </div>
+            <li className="playlist-item" onClick={openModal}>
+                <Icon icon="solar:add-circle-linear" className="add-playlist-icon" />
+                <h3 className="playlist-name">Создать плейлист</h3>
             </li>
             
             {isModalOpen && (

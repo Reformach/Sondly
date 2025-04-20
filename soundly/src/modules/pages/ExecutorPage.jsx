@@ -3,7 +3,7 @@ import HeaderPage from "../common components/HeaderPage";
 import PageSwitchingButtons from "../common components/PageSwitchingButtons";
 import Chart from "./main page components/Chart";
 import Player from "../common components/Player";
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 import { UserContext } from '../context/UserContext';
@@ -14,6 +14,7 @@ import Playlists from "./main page components/Playlists";
 
 const ExecutorPage = () => {
     const { executorId } = useParams();
+    const navigate = useNavigate();
     const [executor, setExecutor] = useState(null);
     const [executorTracks, setExecutorTracks] = useState([]);
     const [executorAlbums, setExecutorAlbums] = useState([]);
@@ -45,6 +46,10 @@ const ExecutorPage = () => {
         fetchExecutorData();
     }, [executorId]);
 
+    const handleAlbumClick = (albumId) => {
+        navigate(`/album/${albumId}`);
+    };
+
     return (
         <PlayerProvider>
             <LeftPanel />
@@ -74,9 +79,14 @@ const ExecutorPage = () => {
                                 <div className="albums-grid">
                                     {executorAlbums.length > 0 ? (
                                         executorAlbums.map(album => (
-                                            <div key={album.id} className="album-card">
+                                            <div 
+                                                key={album.id} 
+                                                className="album-card"
+                                                onClick={() => handleAlbumClick(album.id)}
+                                                style={{ cursor: 'pointer' }}
+                                            >
                                                 <img 
-                                                    src={album.image_src || '/default-cover.jpg'} 
+                                                    src={`http://localhost:4000/${album.image_src}` || 'http://localhost:4000/default-cover.jpg'} 
                                                     alt={album.name} 
                                                     className="album-cover" 
                                                 />

@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const ChartStroke = ({ coverImage, title, artist, duration, onClick, trackId, executorId, playCount, position }) => {
-    const { userData, isTrackLiked, loadFavorites } = useContext(UserContext);
+    const { userData, isTrackLiked, forceFavoritesReload, setUserData } = useContext(UserContext);
     const [isLiked, setIsLiked] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
@@ -37,8 +37,6 @@ const ChartStroke = ({ coverImage, title, artist, duration, onClick, trackId, ex
     const displayTitle = title || 'Неизвестный трек';
     const displayArtist = artist || 'Неизвестный исполнитель';
   
-    console.log("ChartStroke render:", { originalImage: coverImage, formattedImage: displayCoverImage, title, artist });
-  
     useEffect(() => {
       setIsLiked(isTrackLiked(trackId));
     }, [trackId, userData.favoritesPlaylist?.tracks, isTrackLiked]);
@@ -55,15 +53,50 @@ const ChartStroke = ({ coverImage, title, artist, duration, onClick, trackId, ex
       }
       
       setIsProcessing(true);
+      
+      // Оптимистичное обновление интерфейса - меняем состояние сразу
+      const newIsLiked = !isLiked;
+      setIsLiked(newIsLiked);
+      
+      // Создаем копию текущего списка избранных треков
+      const currentTracks = [...(userData.favoritesPlaylist?.tracks || [])];
+      let updatedTracks;
+      
+      if (newIsLiked) {
+        // Если добавляем в избранное - находим трек по ID в имеющихся данных
+        // и добавляем его в массив
+        const trackData = { id: trackId, name: title, album: { executor_name: artist, image_src: coverImage } };
+        updatedTracks = [...currentTracks, trackData];
+      } else {
+        // Если удаляем из избранного - фильтруем массив
+        updatedTracks = currentTracks.filter(track => track.id !== trackId);
+      }
+      
+      // Обновляем состояние context без запроса к серверу
+      setUserData(prev => ({
+        ...prev,
+        favoritesPlaylist: {
+          ...prev.favoritesPlaylist,
+          tracks: updatedTracks
+        }
+      }));
+      
       try {
+        // Обновляем данные на сервере
         await axios.post('http://localhost:4000/update-favorites', {
           playlistId: userData.favoritesPlaylist.id,
           trackId: trackId,
-          action: isLiked ? 'remove' : 'add'
+          action: newIsLiked ? 'add' : 'remove'
         });
-        await loadFavorites(userData.id);
+        
+        // Не вызываем loadFavorites после каждого обновления
+        // Данные уже обновлены локально
       } catch (error) {
         console.error('Ошибка:', error);
+        // При ошибке откатываем локальные изменения
+        setIsLiked(!newIsLiked);
+        // И только в случае ошибки принудительно перезагружаем данные с сервера
+        forceFavoritesReload();
       } finally {
         setIsProcessing(false);
       }
@@ -147,6 +180,17 @@ const ChartStroke = ({ coverImage, title, artist, duration, onClick, trackId, ex
     return (
         <li className="chart-stroke" onClick={onClick}>
             <div className="name-and-description">
+            <button 
+                      className={`like-button ${isProcessing ? 'processing' : ''}`}
+                      onClick={handleLike}
+                      disabled={isProcessing}
+                      aria-label={isLiked ? "Удалить из избранного" : "Добавить в избранное"}
+                    >
+                        <Icon 
+                          icon={isLiked ? "solar:heart-bold" : "solar:heart-outline"} 
+                          className={`like-button-icon ${isLiked ? 'liked' : ''}`} 
+                        />
+                    </button>
                 <img src={displayCoverImage} alt="Обложка альбома" className='image-track'/>
                 <div className="description-container">
                     <span className="chart-title">{displayTitle}</span>
@@ -159,34 +203,23 @@ const ChartStroke = ({ coverImage, title, artist, duration, onClick, trackId, ex
                 </div>
             </div>
             <div className="chart-interaction">
-                <button className="play-music">
-                    <Icon icon="solar:play-line-duotone" className="play-button-icon-chart" />
-                </button>
-                <div className="like-and-time">
-                    <button 
-                      className={`like-button ${isProcessing ? 'processing' : ''}`}
-                      onClick={handleLike}
-                      disabled={isProcessing}
-                      aria-label={isLiked ? "Удалить из избранного" : "Добавить в избранное"}
-                    >
-                        <Icon 
-                          icon={isLiked ? "solar:heart-bold" : "solar:heart-outline"} 
-                          className={`like-button-icon ${isLiked ? 'liked' : ''}`} 
-                        />
-                    </button>
-                    <button 
-                      className="add-to-playlist-button"
-                      onClick={openPlaylistModal}
-                      aria-label="Добавить в плейлист"
-                    >
-                        <Icon icon="solar:playlist-add-linear" className="add-to-playlist-icon" />
-                    </button>
-                    {playCount !== undefined && (
+            {playCount !== undefined && (
                         <div className="play-count">
                             <Icon icon="solar:headphones-round-linear" className="play-count-icon" />
                             <span>{playCount}</span>
                         </div>
                     )}
+                <button className="play-music">
+                    <Icon icon="solar:play-line-duotone" className="play-button-icon-chart" />
+                </button>
+                <div className="like-and-time">
+                    <button 
+                      className="add-to-playlist-button"
+                      onClick={openPlaylistModal}
+                      aria-label="Добавить в плейлист"
+                    >
+                        <Icon icon="tabler:playlist-add" className="add-to-playlist-icon" />
+                    </button>
                     <p>{duration}</p>
                 </div>
             </div>
